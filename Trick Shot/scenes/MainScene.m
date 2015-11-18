@@ -426,14 +426,12 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             else if (type == IEPowerupGhost){
                 
                 if (!ghost){
-                    NSLog(@"Ghost set YES");
                     ghost = YES;
                     self.circle.alpha = 0.5;
                     self.circle.physicsBody.collisionBitMask = edgeCategory | noClickCategory;
                     self.circle.physicsBody.contactTestBitMask = noClickCategory | edgeCategory | holeCategory;
                 }
                 else{
-                    NSLog(@"Ghost set NO");
                     ghost = NO;
                     self.circle.alpha = 1;
                     self.circle.physicsBody.collisionBitMask = edgeCategory | solidCategory;
@@ -687,7 +685,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 
 /*Registers touch movement. During the edge placing the user can drag their finger to another area to create a new node */
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
-    NSLog(@"touches moved");
     UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInNode:self];
     if (self.gameState == GameStatePlacingItems&&self.menuState == MenuStateHidden){
@@ -719,7 +716,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         CGPathMoveToPoint(pathToDraw, NULL, self.manager.firstTouch.x , self.manager.firstTouch.y);
         CGPathAddLineToPoint(pathToDraw, NULL, location.x, location.y);
         self.dragShape.path = pathToDraw;
-        NSLog(@"Drawwing path");
     }
     else if (self.gameState == GameStateWaitingForTouch && self.menuState == MenuStateHidden){
         CGFloat distance = sqrtf(powf(self.size.width/2, 2)+powf(self.size.height/2, 2));
@@ -760,7 +756,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         }
         else{
             float newTheta = (float)degrees;
-            NSLog(@"%i", (int)newTheta);
             newTheta *= M_PI/180.0;
             location = CGPointMake(self.manager.firstTouch.x+distance*cosf(newTheta), self.manager.firstTouch.y+distance*sinf(newTheta));
         }
@@ -839,6 +834,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         [self.motionManager stopDeviceMotionUpdates];
         self.motionManager = nil;
     }
+    AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+    if (!delegate.adsRemoved)
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"showInterstitial" object:nil];
+    
     SKSpriteNode *black = [SKSpriteNode spriteNodeWithColor:[MainScene colorWithR:54 G:54 B:54] size:self.size];
     black.position = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
     black.alpha = 0;
@@ -944,7 +943,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             [self addChild:sprite];
             [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:0.5+0.25*k], [SKAction moveByX:0 y:-sprite.size.height/2-self.size.height*1/4 duration:0.25]]]];
         }
-    }}
+    }
+}
 
 /*Selection Manager delegate calls methods on user point selection and connection creation */
 #pragma mark - Selection Manager Delegate
@@ -1015,11 +1015,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             }
         }
         if (number.intValue == degrees && number.intValue%90 != 0 && !contains){
-            NSLog(@"Deleting %i", number.intValue);
             [array addObject:number];
         }
-        else
-            NSLog(@"Stored %i", number.intValue);
     }
     [self.angles removeObjectsInArray:array];
 }

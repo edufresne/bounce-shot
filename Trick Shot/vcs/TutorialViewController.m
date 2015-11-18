@@ -47,7 +47,6 @@
     [self.pageController.view removeFromSuperview];
     [self.pageController removeFromParentViewController];
     [self dismissViewControllerAnimated:YES completion:nil];
-    NSLog(@"Here");
 }
 #pragma mark - UIPageViewController Data Source
 -(UIViewController*)pageViewController:(UIPageViewController *)pageViewController viewControllerAfterViewController:(UIViewController *)viewController{

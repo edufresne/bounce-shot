@@ -26,3 +26,8 @@ typedef enum : NSUInteger{
 -(id)initWithPowerupType:(IEPowerupType)type shiftPoint:(CGPoint)point;
 +(instancetype)powerupWithType:(IEPowerupType)type shiftPoint:(CGPoint)point;
 @end
+static IEPowerupType* powerupsInOrder(){
+    IEPowerupType type_arr[6] = {IEPowerupAimAndFire, IEPowerupGravity, IEPowerupKey, IEPowerupGhost, IEPowerupImmune, IEPowerupTilt};
+    IEPowerupType *ptr = type_arr;
+    return ptr;
+}

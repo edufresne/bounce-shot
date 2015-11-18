@@ -10,6 +10,7 @@
 #import "IEDataManager.h"
 #import "AppDelegate.h"
 #import "MainScene.h"
+#import "ViewController.h"
 
 #define DIM_FACTOR 6.0
 #define STAR_DIM_FACTOR 4.0
@@ -32,17 +33,30 @@
         levelText = [levelText stringByTrimmingCharactersInSet:[NSCharacterSet letterCharacterSet]];
         NSInteger levelNumber = levelText.integerValue;
         if (levelNumber<=[[IEDataManager sharedManager] highestUnlock]){
-            [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInteger:self.pageIndex] forKey:@"lastPage"];
-            [self.view removeGestureRecognizer:self.left];
-            [self.view removeGestureRecognizer:self.right];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"hidePageControl" object:nil];
+            [self prepareToLeave];
             MainScene *scene = [[MainScene alloc] initWithSize:self.view.bounds.size];
             scene.controller = [IEBounceLevelController controllerWithLevelNumber:levelNumber];
             scene.colorIndex = self.pageIndex;
             scene.scaleMode = self.scaleMode;
             [self.view presentScene:scene];
         }
+        else{
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"Level %i is locked", (int)levelNumber] message:[NSString stringWithFormat:@"Skip level %i", (int)[IEDataManager sharedManager].highestUnlock] preferredStyle:UIAlertControllerStyleAlert];
+            [alertController addAction:[UIAlertAction actionWithTitle:@"Skip Level" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                __weak ViewController *vc = (ViewController*)self.view.window.rootViewController;
+                [vc skipLevelPressed:nil];
+            }]];
+            [alertController addAction:[UIAlertAction actionWithTitle:@"Dismiss" style:UIAlertActionStyleCancel handler:nil]];
+            ViewController *vc = (ViewController*)self.view.window.rootViewController;
+            [vc presentViewController:alertController animated:YES completion:nil];
+        }
     }
+}
+-(void)prepareToLeave{
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInteger:self.pageIndex] forKey:@"lastPage"];
+    [self.view removeGestureRecognizer:self.left];
+    [self.view removeGestureRecognizer:self.right];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"hidePageControl" object:nil];
 }
 #pragma mark - Gesture Recogniztion actions
 -(void)swipeLeft{

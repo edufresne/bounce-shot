@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <mutableArray key="Roboto-Thin.ttf">
+            <string>Roboto-Thin</string>
+            <string>Roboto-Thin</string>
+            <string>Roboto-Thin</string>
+        </mutableArray>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -21,20 +30,144 @@
                                 <rect key="frame" x="281" y="533" width="39" height="37"/>
                                 <animations/>
                             </pageControl>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K3L-AW-1ts">
+                                <rect key="frame" x="426" y="28" width="139" height="48"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="139" id="5gP-lA-2Tg"/>
+                                    <constraint firstAttribute="height" constant="48" id="Z0N-ag-2QV"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Roboto-Thin" family="Roboto" pointSize="19"/>
+                                <state key="normal" title="Level Skips: 0">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="skipLevelPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wYj-xc-SSD"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D8L-eN-Ip6">
+                                <rect key="frame" x="231" y="552" width="139" height="48"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="139" id="kPx-vr-Q21"/>
+                                    <constraint firstAttribute="height" constant="48" id="yk4-CV-VKL"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Roboto-Thin" family="Roboto" pointSize="19"/>
+                                <state key="normal" title="Back">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="backButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="7WJ-hL-T6w"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="7JW-GE-enD" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Ayq-VB-XGx"/>
+                            <constraint firstItem="K3L-AW-1ts" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="HFS-rV-BwH"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="7JW-GE-enD" secondAttribute="bottom" constant="30" id="WqZ-YC-JjJ"/>
+                            <constraint firstItem="D8L-eN-Ip6" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="aHP-Bl-sYt"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="D8L-eN-Ip6" secondAttribute="bottom" id="dyh-mk-Zf7"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="K3L-AW-1ts" secondAttribute="trailing" constant="15" id="lC4-kp-xAy"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="backButton" destination="D8L-eN-Ip6" id="Dpm-oT-jQF"/>
                         <outlet property="pageControl" destination="7JW-GE-enD" id="tWe-pP-Jwi"/>
+                        <outlet property="skipLevels" destination="K3L-AW-1ts" id="PNW-D9-BI7"/>
+                        <segue destination="QFf-NM-0yi" kind="show" identifier="showTutorial" id="feV-lo-Tgv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="510" y="223"/>
+        </scene>
+        <!--Tutorial View Controller-->
+        <scene sceneID="qFW-f7-jr0">
+            <objects>
+                <viewController id="QFf-NM-0yi" customClass="TutorialViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="QfI-XR-EQl"/>
+                        <viewControllerLayoutGuide type="bottom" id="HrK-XF-7nt"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="MGi-Rt-qSW">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a1L-mY-rsq">
+                                <rect key="frame" x="231" y="552" width="139" height="48"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Phf-Lc-lRH"/>
+                                    <constraint firstAttribute="width" constant="139" id="sBF-i9-yiA"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Roboto-Thin" family="Roboto" pointSize="19"/>
+                                <state key="normal" title="Done">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="pressedSkip:" destination="QFf-NM-0yi" eventType="touchUpInside" id="Ek7-hO-m9Y"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <animations/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="a1L-mY-rsq" firstAttribute="centerX" secondItem="MGi-Rt-qSW" secondAttribute="centerX" id="JKC-te-9xH"/>
+                            <constraint firstItem="HrK-XF-7nt" firstAttribute="top" secondItem="a1L-mY-rsq" secondAttribute="bottom" id="sKw-As-wLl"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ifE-Fi-Gio" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1199" y="223"/>
+        </scene>
+        <!--Tutorial Content View Controller-->
+        <scene sceneID="vSH-az-LYY">
+            <objects>
+                <viewController storyboardIdentifier="ContentController" id="X65-jb-SgU" customClass="TutorialContentViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Vuu-AM-ahP"/>
+                        <viewControllerLayoutGuide type="bottom" id="7SD-Gl-LEA"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6hZ-tE-lFq">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yBI-bK-nwH">
+                                <rect key="frame" x="151" y="34" width="298" height="531"/>
+                                <animations/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="298" id="0SF-eF-73v"/>
+                                    <constraint firstAttribute="height" constant="531" id="Se3-AB-tLK"/>
+                                    <constraint firstAttribute="width" secondItem="yBI-bK-nwH" secondAttribute="height" multiplier="298:531" id="Vxl-FM-jrD"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <animations/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="yBI-bK-nwH" firstAttribute="centerX" secondItem="6hZ-tE-lFq" secondAttribute="centerX" id="AV7-aZ-o14"/>
+                            <constraint firstItem="yBI-bK-nwH" firstAttribute="centerY" secondItem="6hZ-tE-lFq" secondAttribute="centerY" id="B53-g5-ApP"/>
+                            <constraint firstItem="7SD-Gl-LEA" firstAttribute="top" secondItem="yBI-bK-nwH" secondAttribute="bottom" constant="35" id="j6V-Ge-yg6"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="imageView" destination="yBI-bK-nwH" id="Erh-Rm-WvC"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="gox-ub-zhg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1916" y="223"/>
+        </scene>
+        <!--Page View Controller-->
+        <scene sceneID="j6A-Sd-gqQ">
+            <objects>
+                <pageViewController storyboardIdentifier="PageController" autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="4Lg-v8-k4S" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tLa-sN-VUp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1916" y="867"/>
         </scene>
     </scenes>
 </document>

@@ -70,4 +70,10 @@
     }
     return self;
 }
++(NSArray*)powerupDescriptionsInOrder{
+    return [NSArray arrayWithObjects:@"Aim and Fire", @"Gravity", @"Key", @"Ghost", @"Immunity", @"Tilt", nil];
+}
++(NSArray*)textureNamesInOrder{
+    return [NSArray arrayWithObjects:@"icon_aim", @"icon_gravity", @"icon_key", @"icon_ghost", @"icon_invincible", @"icon_tilt", nil];
+}
 @end

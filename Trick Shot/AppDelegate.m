@@ -8,9 +8,13 @@
 
 #import "AppDelegate.h"
 #import "IEDataManager.h"
+#import <GameKit/GameKit.h>
+#import "Reachability.h"
 
 @interface AppDelegate ()
-
+{
+    Reachability *reachability;
+}
 @end
 
 @implementation AppDelegate
@@ -72,9 +76,30 @@
                            [UIColor colorWithRed:0.294f green:0.294f blue:0.294f alpha:1.00f]
                            ];
     self.pageToShow = 0;
+    self.adsRemoved = [[NSUserDefaults standardUserDefaults] boolForKey:@"adsRemoved"];
     [[UIPageControl appearance] setCurrentPageIndicatorTintColor:[UIColor darkGrayColor]];
     [[UIPageControl appearance] setPageIndicatorTintColor:[UIColor colorWithRed:0.666 green:0.666 blue:0.666 alpha:0.5]];
+    [self authenticate];
     return YES;
+}
+#pragma mark - Game Center Methods
+-(void)authenticate{
+    GKLocalPlayer *player = [GKLocalPlayer localPlayer];
+    if (!player.authenticated){
+        player.authenticateHandler = ^(UIViewController* vc, NSError *error ){
+            if (vc!= nil)
+                self.gameCenterViewController = vc;
+            else if ([GKLocalPlayer localPlayer].isAuthenticated){
+                //Do nothing
+            }
+            else{
+                NSLog(@"Not Successful at game center authentication. %@", error.localizedDescription);
+            }
+        };
+    }
+}
+-(void)showGameCenterViewController{
+    [self.window.rootViewController showViewController:self.gameCenterViewController sender:self.window.rootViewController];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -92,6 +117,16 @@
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
+    reachability = [Reachability reachabilityWithHostname:@"www.google.com"];
+    __weak AppDelegate *weakself = self;
+    reachability.reachableBlock = ^(Reachability *reach){
+        weakself.reachable = YES;
+    };
+    reachability.unreachableBlock = ^(Reachability* reach){
+        weakself.reachable = NO;
+    };
+    [reachability startNotifier];
+    
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 }
 

@@ -28,7 +28,6 @@ CGFloat distanceFromPointToLine(IELineSegment segment, CGPoint point){
     CGFloat distance = distanceFromPoints(segment.first,segment.second);
     
     CGFloat result = fabs((segment.second.y-segment.first.y)*point.x-(segment.second.x-segment.first.x)*point.y+segment.second.x*segment.first.y-segment.first.x*segment.second.y)/distance;
-    NSLog(@"Distance from point: %f", result);
     return result;
 }
 bool segmentInRangeFromPoint(IELineSegment segment, CGPoint point, CGFloat threshold){

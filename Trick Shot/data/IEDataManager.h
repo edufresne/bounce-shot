@@ -7,17 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <GameKit/GameKit.h>
 #import "IEBounceLevelController.h"
 
 @interface IEDataManager : NSObject
 @property (assign, nonatomic) NSUInteger highestUnlock;
-@property (assign, nonatomic) NSUInteger highestTier;
 @property (assign, nonatomic) BOOL hasRanBefore;
 @property (assign, nonatomic) BOOL isLoaded;
 @property (assign, nonatomic) BOOL showTutorial;
 @property (assign, nonatomic) NSUInteger localLevelCount;
+@property (assign, nonatomic) NSUInteger levelSkips;
 +(IEDataManager*)sharedManager;
 -(void)completedLevel:(NSUInteger)level withStars:(NSUInteger)stars;
+-(void)skippedLevel;
+-(void)purchasedSkips;
 -(NSUInteger)starsForLevel:(NSUInteger)level;
 -(NSUInteger)starCount;
 @end

@@ -27,5 +27,12 @@
 -(BOOL)hasDarkColorSchemeForIndex:(NSUInteger)index;
 -(BOOL)storeShiftPoint:(CGPoint)shiftPoint forIntegerKey:(NSInteger)integer ball:(BOOL)isBall;
 -(CGPoint)getShiftPointForIntegerKey:(NSInteger)key ball:(BOOL)isBall;
+
+@property (strong, nonatomic) UIViewController *gameCenterViewController;
+-(void)authenticate;
+-(void)showGameCenterViewController;
+
+@property (assign, nonatomic) BOOL adsRemoved;
+@property (assign, nonatomic) BOOL reachable;
 @end
 

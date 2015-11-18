@@ -89,7 +89,6 @@
 -(UIBezierPath*)pathInView:(SKView *)view scale:(CGFloat)scale{
     if (view == nil)
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Creating path not allowed with nil view" userInfo:nil];
-    NSLog(@"Frame Dimensions: %f, %f", view.frame.size.width, view.frame.size.height);
     UIBezierPath *path = [UIBezierPath bezierPath];
     for (int k = 0;k<self.pointDictionaries.count;k++){
         NSDictionary *dictionary = [self.pointDictionaries objectAtIndex:k];

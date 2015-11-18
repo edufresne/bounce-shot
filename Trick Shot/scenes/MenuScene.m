@@ -10,12 +10,12 @@
 #import "AppDelegate.h"
 #import "NewLevelSelectScene.h"
 #import "ViewController.h"
+#import "SettingsScene.h"
 
 @interface MenuScene (){
     NSTimer *timer;
 }
 @property BOOL contentCreated;
-@property (assign, nonatomic) NSUInteger currentIndex;
 @end
 @implementation MenuScene
 static const uint32_t contactCategory = 0x1 << 0;
@@ -27,7 +27,6 @@ static const uint32_t contactCategory = 0x1 << 0;
     }
 }
 -(void)createSceneContent{
-    // 4,
     self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
     self.physicsBody.restitution = 1;
     self.physicsBody.categoryBitMask = contactCategory;
@@ -100,7 +99,10 @@ static const uint32_t contactCategory = 0x1 << 0;
     rateNode.fontSize = 20;
     rateNode.text = @"Rate";
     rateNode.name = @"rate";
-    rateNode.position = CGPointMake(CGRectGetMinX(leaderboardsNode.frame)+rateNode.frame.size.width/2, leaderboardsNode.position.y-50);
+    if (!delegate.adsRemoved)
+        rateNode.position = CGPointMake(CGRectGetMinX(leaderboardsNode.frame)+rateNode.frame.size.width/2, leaderboardsNode.position.y-50);
+    else
+        rateNode.position = CGPointMake(CGRectGetMidX(self.frame), leaderboardsNode.position.y-50);
     rateNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:rateNode.frame.size center:CGPointMake(0, rateNode.frame.size.height/2)];
     rateNode.physicsBody.friction = 0;
     rateNode.physicsBody.restitution = 1;
@@ -110,21 +112,34 @@ static const uint32_t contactCategory = 0x1 << 0;
     rateNode.physicsBody.dynamic = NO;
     [self addChild:rateNode];
     
-    IELabelButton *removeAdsNode = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
-    removeAdsNode.delegate = self;
-    removeAdsNode.fontSize = 20;
-    removeAdsNode.text = @"Remove Ads";
-    removeAdsNode.name = @"removeAds";
-    removeAdsNode.position = CGPointMake(CGRectGetMaxX(leaderboardsNode.frame)-removeAdsNode.frame.size.width/2, rateNode.position.y);
-    removeAdsNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:removeAdsNode.frame.size center:CGPointMake(0, removeAdsNode.frame.size.height/2)];
-    removeAdsNode.physicsBody.friction = 0;
-    removeAdsNode.physicsBody.restitution = 1;
-    removeAdsNode.physicsBody.categoryBitMask = contactCategory;
-    removeAdsNode.physicsBody.contactTestBitMask = contactCategory;
-    removeAdsNode.physicsBody.collisionBitMask = 0xFFFFFF;
-    removeAdsNode.physicsBody.dynamic = NO;
-    [self addChild:removeAdsNode];
-    
+    if (!delegate.adsRemoved){
+        IELabelButton *removeAdsNode = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
+        removeAdsNode.delegate = self;
+        removeAdsNode.fontSize = 20;
+        removeAdsNode.text = @"Remove Ads";
+        removeAdsNode.name = @"removeAds";
+        removeAdsNode.position = CGPointMake(CGRectGetMaxX(leaderboardsNode.frame)-removeAdsNode.frame.size.width/2, rateNode.position.y);
+        removeAdsNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:removeAdsNode.frame.size center:CGPointMake(0, removeAdsNode.frame.size.height/2)];
+        removeAdsNode.physicsBody.friction = 0;
+        removeAdsNode.physicsBody.restitution = 1;
+        removeAdsNode.physicsBody.categoryBitMask = contactCategory;
+        removeAdsNode.physicsBody.contactTestBitMask = contactCategory;
+        removeAdsNode.physicsBody.collisionBitMask = 0xFFFFFF;
+        removeAdsNode.physicsBody.dynamic = NO;
+        [self addChild:removeAdsNode];
+    }
+    IELabelButton *helpButton = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
+    helpButton.delegate = self;
+    helpButton.fontSize = 30;
+    helpButton.text = @"?";
+    helpButton.name = @"helpButton";
+    helpButton.position = CGPointMake(self.size.width-helpButton.frame.size.width/2, self.size.height-helpButton.frame.size.height/2);
+    helpButton.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:helpButton.frame.size center:CGPointMake(0, helpButton.frame.size.height/2)];
+    helpButton.physicsBody.categoryBitMask = contactCategory;
+    helpButton.physicsBody.contactTestBitMask = contactCategory;
+    helpButton.physicsBody.collisionBitMask = 0xFFFFFF;
+    helpButton.physicsBody.affectedByGravity = NO;
+    [self addChild:helpButton];
     
     SKShapeNode *shape = [SKShapeNode shapeNodeWithCircleOfRadius:256];
     shape.fillColor = [SKColor whiteColor];
@@ -179,13 +194,33 @@ static const uint32_t contactCategory = 0x1 << 0;
         [self.view presentScene:scene];
     }
     else if ([released.name isEqualToString:@"leaderboards"]){
-        NSLog(@"Leaderboards");
+        ViewController *vc = (ViewController*)self.view.window.rootViewController;
+        [vc attemptAuthenticateForLeaderboard];
     }
     else if ([released.name isEqualToString:@"rate"]){
-        NSLog(@"Rate");
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"itms-app://itunes.com/app/id955896287"]];
+#warning - Replace ID for rate link with 1059196616
     }
     else if ([released.name isEqualToString:@"removeAds"]){
-        NSLog(@"RemoveAds");
+        UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Remove Ads" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+        [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+        __weak MenuScene *weakself = self;
+        [controller addAction:[UIAlertAction actionWithTitle:@"Purchase" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            ViewController *vc = (ViewController*)weakself.view.window.rootViewController;
+            [vc purchaseRemoveAds];
+        }]];
+        [controller addAction:[UIAlertAction actionWithTitle:@"Restore Purchases" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            ViewController *vc = (ViewController*)weakself.view.window.rootViewController;
+            [vc restorePurchases];
+        }]];
+        [self.view.window.rootViewController presentViewController:controller animated:YES completion:nil];
+    }
+    else if ([released.name isEqualToString:@"helpButton"]){
+        ViewController *controller = (ViewController*)self.view.window.rootViewController;
+        controller.backButton.hidden = NO;
+        SettingsScene *scene = [[SettingsScene alloc] initWithSize:self.view.bounds.size];
+        scene.scaleMode = self.scaleMode;
+        [self.view presentScene:scene];
     }
 }
 -(void)didBeginContact:(SKPhysicsContact *)contact{

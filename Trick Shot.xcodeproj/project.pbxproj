@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		073714361BF8185C00EFABCD /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 073714351BF8185C00EFABCD /* StoreKit.framework */; };
+		073714381BF8186200EFABCD /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 073714371BF8186200EFABCD /* GameKit.framework */; };
+		078BA4AD1BF99256005CF05C /* Roboto-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */; };
 		07B1F7191BF7FEC400DEE6A7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B1F7181BF7FEC400DEE6A7 /* main.m */; };
 		07B1F71C1BF7FEC400DEE6A7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B1F71B1BF7FEC400DEE6A7 /* AppDelegate.m */; };
 		07B1F71F1BF7FEC400DEE6A7 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B1F71E1BF7FEC400DEE6A7 /* ViewController.m */; };
@@ -44,9 +47,14 @@
 		07B1F7871BF801D700DEE6A7 /* NewLevelSelectScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B1F7861BF801D700DEE6A7 /* NewLevelSelectScene.m */; };
 		07B1F7891BF8052800DEE6A7 /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B1F7881BF8052800DEE6A7 /* SpriteKit.framework */; };
 		07B1F78B1BF8052F00DEE6A7 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B1F78A1BF8052F00DEE6A7 /* CoreMotion.framework */; };
+		07EBD2961BFC704C0016DE31 /* SettingsScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07EBD2951BFC704C0016DE31 /* SettingsScene.m */; };
+		40B5BA5325C14911351611B3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 45F67282608FB510DA543BFA /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		073714351BF8185C00EFABCD /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		073714371BF8186200EFABCD /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
+		078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Thin.ttf"; sourceTree = "<group>"; };
 		07B1F7141BF7FEC400DEE6A7 /* Trick Shot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Trick Shot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		07B1F7181BF7FEC400DEE6A7 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		07B1F71A1BF7FEC400DEE6A7 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -100,6 +108,11 @@
 		07B1F7861BF801D700DEE6A7 /* NewLevelSelectScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewLevelSelectScene.m; path = scenes/NewLevelSelectScene.m; sourceTree = "<group>"; };
 		07B1F7881BF8052800DEE6A7 /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = System/Library/Frameworks/SpriteKit.framework; sourceTree = SDKROOT; };
 		07B1F78A1BF8052F00DEE6A7 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
+		07EBD2941BFC704B0016DE31 /* SettingsScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsScene.h; sourceTree = "<group>"; };
+		07EBD2951BFC704C0016DE31 /* SettingsScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsScene.m; sourceTree = "<group>"; };
+		45F67282608FB510DA543BFA /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,8 +120,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				073714381BF8186200EFABCD /* GameKit.framework in Frameworks */,
+				073714361BF8185C00EFABCD /* StoreKit.framework in Frameworks */,
 				07B1F78B1BF8052F00DEE6A7 /* CoreMotion.framework in Frameworks */,
 				07B1F7891BF8052800DEE6A7 /* SpriteKit.framework in Frameworks */,
+				40B5BA5325C14911351611B3 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,10 +134,14 @@
 		07B1F70B1BF7FEC400DEE6A7 = {
 			isa = PBXGroup;
 			children = (
+				073714371BF8186200EFABCD /* GameKit.framework */,
+				073714351BF8185C00EFABCD /* StoreKit.framework */,
 				07B1F78A1BF8052F00DEE6A7 /* CoreMotion.framework */,
 				07B1F7881BF8052800DEE6A7 /* SpriteKit.framework */,
 				07B1F7161BF7FEC400DEE6A7 /* Trick Shot */,
 				07B1F7151BF7FEC400DEE6A7 /* Products */,
+				D3AFB89C2488F6323FD9D589 /* Pods */,
+				B0CC588D565ABBFE6F88BEB0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -183,6 +203,8 @@
 				07B1F7411BF8006F00DEE6A7 /* MainScene.m */,
 				07B1F7421BF8006F00DEE6A7 /* MenuScene.h */,
 				07B1F7431BF8006F00DEE6A7 /* MenuScene.m */,
+				07EBD2941BFC704B0016DE31 /* SettingsScene.h */,
+				07EBD2951BFC704C0016DE31 /* SettingsScene.m */,
 			);
 			name = scenes;
 			sourceTree = "<group>";
@@ -204,6 +226,7 @@
 		07B1F7591BF800E400DEE6A7 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */,
 				07B1F76A1BF8010900DEE6A7 /* tut screens */,
 				07B1F75A1BF800FA00DEE6A7 /* arrow_light.png */,
 				07B1F75B1BF800FA00DEE6A7 /* star.png */,
@@ -254,6 +277,23 @@
 			name = helpers;
 			sourceTree = "<group>";
 		};
+		B0CC588D565ABBFE6F88BEB0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				45F67282608FB510DA543BFA /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D3AFB89C2488F6323FD9D589 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */,
+				49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -261,9 +301,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 07B1F72E1BF7FEC400DEE6A7 /* Build configuration list for PBXNativeTarget "Trick Shot" */;
 			buildPhases = (
+				CF9578BBC1E6F007B276A51A /* Check Pods Manifest.lock */,
 				07B1F7101BF7FEC400DEE6A7 /* Sources */,
 				07B1F7111BF7FEC400DEE6A7 /* Frameworks */,
 				07B1F7121BF7FEC400DEE6A7 /* Resources */,
+				8BC556856172186CA0DEA103 /* Embed Pods Frameworks */,
+				EF8D0CE118035C41B25780FE /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -285,6 +328,7 @@
 				TargetAttributes = {
 					07B1F7131BF7FEC400DEE6A7 = {
 						CreatedOnToolsVersion = 7.1.1;
+						DevelopmentTeam = 52899258R3;
 					};
 				};
 			};
@@ -319,6 +363,7 @@
 				07B1F7551BF800A100DEE6A7 /* menu.png in Resources */,
 				07B1F7271BF7FEC400DEE6A7 /* Assets.xcassets in Resources */,
 				07B1F7521BF800A100DEE6A7 /* level.png in Resources */,
+				078BA4AD1BF99256005CF05C /* Roboto-Thin.ttf in Resources */,
 				07B1F7531BF800A100DEE6A7 /* lockicon.png in Resources */,
 				07B1F7511BF800A100DEE6A7 /* level_selected.png in Resources */,
 				07B1F7691BF8010100DEE6A7 /* tutscreen5.jpg in Resources */,
@@ -335,6 +380,54 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		8BC556856172186CA0DEA103 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CF9578BBC1E6F007B276A51A /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		EF8D0CE118035C41B25780FE /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		07B1F7101BF7FEC400DEE6A7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -343,6 +436,7 @@
 				07B1F7461BF8006F00DEE6A7 /* MenuScene.m in Sources */,
 				07B1F73B1BF8005E00DEE6A7 /* TutorialViewController.m in Sources */,
 				07B1F7751BF8011B00DEE6A7 /* IEBounceLevelController.m in Sources */,
+				07EBD2961BFC704C0016DE31 /* SettingsScene.m in Sources */,
 				07B1F7871BF801D700DEE6A7 /* NewLevelSelectScene.m in Sources */,
 				07B1F71F1BF7FEC400DEE6A7 /* ViewController.m in Sources */,
 				07B1F77F1BF8012D00DEE6A7 /* IEButton.m in Sources */,
@@ -465,23 +559,53 @@
 		};
 		07B1F72F1BF7FEC400DEE6A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "IndieEndGames.Trick-Shot";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-l\"Reachability\"",
+					"-framework",
+					"\"GoogleMobileAds\"",
+					"-framework",
+					"\"SystemConfiguration\"",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.IndieEndGames.Bounce-Draw";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
 		07B1F7301BF7FEC400DEE6A7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "IndieEndGames.Trick-Shot";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-l\"Reachability\"",
+					"-framework",
+					"\"GoogleMobileAds\"",
+					"-framework",
+					"\"SystemConfiguration\"",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.IndieEndGames.Bounce-Draw";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

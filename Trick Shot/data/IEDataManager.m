@@ -23,23 +23,17 @@
 -(id)init{
     if (self = [super init]){
         self.hasRanBefore = [[NSUserDefaults standardUserDefaults] boolForKey:@"hasRanBefore"];
-        self.highestUnlock = 100000;
-        [[NSUserDefaults standardUserDefaults] setInteger:self.highestUnlock forKey:@"highestUnlock"];
         if (!self.hasRanBefore){
-            self.highestUnlock = 10;
-            self.highestTier = 1;
+            self.highestUnlock = 1;
+            self.levelSkips = 1;
+            [[NSUserDefaults standardUserDefaults] setInteger:self.levelSkips forKey:@"levelSkips"];
             [[NSUserDefaults standardUserDefaults] setInteger:self.highestUnlock forKey:@"highestUnlock"];
-            [[NSUserDefaults standardUserDefaults] setInteger:self.highestTier forKey:@"highestTier"];
             self.hasRanBefore = YES;
             self.showTutorial = YES;
             [[NSUserDefaults standardUserDefaults] setBool:self.hasRanBefore forKey:@"hasRanBefore"];
             self.localLevelCount = 100;
-            //Steps for adding a new level.
-            //1. Increase self.localLevelCount value by 1
-            //2. Add implementation for initializeController:
-            //3. Delete old version of app on test device
-            //4. To Test: change view controller passed value
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 NSDate *date = [NSDate date];
                 for (int k = 1;k<=self.localLevelCount;k++){
                     IEBounceLevelController *controller = [IEBounceLevelController controllerWithLevelNumber:k];
@@ -52,8 +46,9 @@
         else{
             self.showTutorial = NO;
             self.localLevelCount = [IEBounceLevelController controllerCount];
+            
             self.highestUnlock = [[NSUserDefaults standardUserDefaults] integerForKey:@"highestUnlock"];
-            self.highestTier = [[NSUserDefaults standardUserDefaults] integerForKey:@"highestTier"];
+            self.levelSkips = [[NSUserDefaults standardUserDefaults] integerForKey:@"levelSkips"];
         }
         [[NSUserDefaults standardUserDefaults] synchronize];
         self.isLoaded = YES;
@@ -93,14 +88,29 @@
     }
     else
         @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Multiple copies of data with the same level number for level %i. One copy must be deleded from core data", (int)level] userInfo:nil];
+    GKScore *score = [[GKScore alloc] initWithLeaderboardIdentifier:@"BounceDraw.Leaderboard"];
+    int64_t value = (int64_t)self.starCount;
+    score.value = value;
+    [GKScore reportScores:@[score] withCompletionHandler:^(NSError * _Nullable error) {
+        if (error)
+            NSLog(@"Error reporting scores");
+    }];
+}
+-(void)skippedLevel{
+    if (self.levelSkips > 0){
+        self.levelSkips--;
+        [[NSUserDefaults standardUserDefaults] setInteger:self.levelSkips forKey:@"levelSkips"];
+        [self advanceLevel];
+    }
+    else
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Attempt to skip level with no skips left made the call to IEDataManger skippedLevel" userInfo:nil];
+}
+-(void)purchasedSkips{
+    self.levelSkips+=3;
+    [[NSUserDefaults standardUserDefaults] setInteger:self.levelSkips forKey:@"levelSkips"];
 }
 -(void)advanceLevel{
     self.highestUnlock++;
-    if (self.highestUnlock>LEVEL_PER_TIER*self.highestTier){
-        self.highestUnlock = LEVEL_PER_TIER*self.highestTier+10;
-        self.highestTier++;
-        [[NSUserDefaults standardUserDefaults] setInteger:self.highestTier forKey:@"highestTier"];
-    }
     [[NSUserDefaults standardUserDefaults] setInteger:self.highestUnlock forKey:@"highestUnlock"];
 }
 -(NSUInteger)starsForLevel:(NSUInteger)level{
@@ -431,7 +441,6 @@
         controller.ballRadius = 16;
         controller.ballAngle = M_PI_2;
         [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.6,0),(0.6,0.4),(0.4,0.4),(0.4,0.6),(0,0.6),(0,0)" texture: IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.4,0.4),(0.4,0.6),(0.6,0.6),(0.6,0.4)" texture:IETextureTypeInstaDeath], [IECustomPath pathWithPointsFromString:@"(0.8,0),(0.8,0.6),(1,0.6),(1,0)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.4,0.75),(0.4,1),(1,1),(1,0.75)" texture:IETextureTypeInstaDeath]]];
-        NSLog(@"Count: %i", (int)controller.customPaths.count);
         AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
         [delegate storeShiftPoint:CGPointMake(0.7, 0.1) forIntegerKey:controller.levelNumber ball:YES];
         controller.starQuantitys = IEStarQuantityCreate(7, 5, 4);
@@ -852,7 +861,6 @@
                               [IECustomPath pathWithPointsFromString:@"(0,0.80),(0,1),(0.35,1)" texture:IETextureTypeSolid],
                               [IECustomPath pathWithPointsFromString:@"(0,0.2),(0,0.25),(0.6,0.25),(0.6,0.75),(0.3,0.75),(0.3,0.8),(0.7,0.8),(0.7,0.2)" texture:IETextureTypeSolid]]];
         [controller addPowerups:@[[IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointMake(0.2, 0.05)], [IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointMake(0.85, 0.9)]]];
-        NSLog(@"powerup count: %i", (int)controller.powerups.count);
         controller.starQuantitys = IEStarQuantityCreate(4, 3, 2);
     }
     else if (controller.levelNumber == 43){

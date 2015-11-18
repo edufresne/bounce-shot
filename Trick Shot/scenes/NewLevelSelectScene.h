@@ -12,4 +12,5 @@
 @property (assign, nonatomic) NSInteger pageIndex;
 @property (assign, nonatomic) NSInteger rows;
 @property (assign, nonatomic) NSInteger columns;
+-(void)prepareToLeave;
 @end
