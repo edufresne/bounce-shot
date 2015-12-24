@@ -11,6 +11,7 @@
 #import "NewLevelSelectScene.h"
 #import "ViewController.h"
 #import "SettingsScene.h"
+#import "SurvivalScene.h"
 
 @interface MenuScene (){
     NSTimer *timer;
@@ -79,12 +80,26 @@ static const uint32_t contactCategory = 0x1 << 0;
     playNode.physicsBody.dynamic = NO;
     [self addChild:playNode];
     
+    IELabelButton *survivalNode = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
+    survivalNode.delegate = self;
+    survivalNode.fontSize = 26;
+    survivalNode.text = @"Survival Mode";
+    survivalNode.position = CGPointMake(self.size.width/2, playNode.position.y-50);
+    survivalNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:survivalNode.frame.size center:CGPointMake(0, survivalNode.frame.size.height/2)];
+    survivalNode.physicsBody.friction = 0;
+    survivalNode.name = @"survivalMode";
+    survivalNode.physicsBody.resting = 1;
+    survivalNode.physicsBody.categoryBitMask = contactCategory;
+    survivalNode.physicsBody.collisionBitMask = 0xFFFFFF;
+    survivalNode.physicsBody.dynamic = NO;
+    [self addChild:survivalNode];
+    
     IELabelButton *leaderboardsNode = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
     leaderboardsNode.delegate = self;
     leaderboardsNode.fontSize = 26;
     leaderboardsNode.text = @"Leaderboards";
     leaderboardsNode.name = @"leaderboards";
-    leaderboardsNode.position = CGPointMake(CGRectGetMidX(self.frame), playNode.position.y-50);
+    leaderboardsNode.position = CGPointMake(CGRectGetMidX(self.frame), survivalNode.position.y-50);
     leaderboardsNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:leaderboardsNode.frame.size center:CGPointMake(0, leaderboardsNode.frame.size.height/2)];
     leaderboardsNode.physicsBody.friction = 0;
     leaderboardsNode.physicsBody.restitution = 1;
@@ -130,15 +145,16 @@ static const uint32_t contactCategory = 0x1 << 0;
     }
     IELabelButton *helpButton = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:baseColor selectedColor:selectedColor];
     helpButton.delegate = self;
-    helpButton.fontSize = 30;
+    helpButton.fontSize = 35;
     helpButton.text = @"?";
     helpButton.name = @"helpButton";
-    helpButton.position = CGPointMake(self.size.width-helpButton.frame.size.width/2, self.size.height-helpButton.frame.size.height/2);
+    helpButton.position = CGPointMake(self.size.width-helpButton.frame.size.width/2-5, self.size.height-helpButton.frame.size.height-5);
     helpButton.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:helpButton.frame.size center:CGPointMake(0, helpButton.frame.size.height/2)];
     helpButton.physicsBody.categoryBitMask = contactCategory;
     helpButton.physicsBody.contactTestBitMask = contactCategory;
     helpButton.physicsBody.collisionBitMask = 0xFFFFFF;
     helpButton.physicsBody.affectedByGravity = NO;
+    helpButton.physicsBody.dynamic = NO;
     [self addChild:helpButton];
     
     SKShapeNode *shape = [SKShapeNode shapeNodeWithCircleOfRadius:256];
@@ -189,8 +205,14 @@ static const uint32_t contactCategory = 0x1 << 0;
             scene.pageIndex = 0;
             vc.pageControl.currentPage = 0;
         }
+        vc.backButton.titleLabel.textColor = [SKColor blackColor];
         scene.rows = 5;
         scene.columns = 4;
+        [self.view presentScene:scene];
+    }
+    else if ([released.name isEqualToString:@"survivalMode"]){
+        SurvivalScene *scene = [[SurvivalScene alloc] initWithSize:self.view.bounds.size];
+        scene.scaleMode = SKSceneScaleModeAspectFill;
         [self.view presentScene:scene];
     }
     else if ([released.name isEqualToString:@"leaderboards"]){

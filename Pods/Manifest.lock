@@ -1,13 +1,16 @@
 PODS:
-  - GoogleMobileAds (7.5.2)
+  - Flurry-iOS-SDK/FlurrySDK (7.3.0)
+  - GoogleMobileAds (7.6.0)
   - Reachability (3.2)
 
 DEPENDENCIES:
+  - Flurry-iOS-SDK/FlurrySDK
   - GoogleMobileAds
   - Reachability
 
 SPEC CHECKSUMS:
-  GoogleMobileAds: 97392919ee98f23202431221ffb36e9fbaeb1bdc
+  Flurry-iOS-SDK: 054befae0fa0244fb000985bfe757d70f87a9f60
+  GoogleMobileAds: c2f4d3ef1be73d58ec25158addfde463636433a6
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
 
 COCOAPODS: 0.39.0

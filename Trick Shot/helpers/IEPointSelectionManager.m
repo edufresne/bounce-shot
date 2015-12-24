@@ -159,41 +159,67 @@ bool segmentInRangeFromPoint(IELineSegment segment, CGPoint point, CGFloat thres
     bool pointResult = (pair.first.x==self.first.x&&pair.first.y==self.first.y&&pair.second.x==self.second.x&&pair.second.y==self.second.y)||(pair.first.x==self.second.x&&pair.second.x==self.first.x&&pair.first.y==self.first.y&&pair.second.y==self.first.y);
     return pointResult&&[self.dot1 isEqualToNode:pair.dot1]&&[self.dot2 isEqualToNode:pair.dot2]&&[pair.edgeShape isEqualToNode:self.edgeShape];
 }
-
 @end
-
-@interface IEStack ()
-@property (strong, nonatomic) NSMutableArray *objects;
-@end
-@implementation IEStack
--(id)initEmpty{
+@implementation IESimpleSelectionManager
+-(id)init{
     if (self = [super init]){
-        self.objects = [[NSMutableArray alloc] init];
+        self.connections = [[NSMutableArray alloc] init];
+        self.hasSelection = NO;
+        self.selectedPoint = CGPointMake(-99, -99);
+        self.minimumDrawDistance = 20.0;
     }
     return self;
 }
-+(instancetype)emptyStack{
-    return [[self alloc] initEmpty];
-}
--(id)peek{
-    if (self.isEmpty)
-        return nil;
+-(void)startedSelection:(CGPoint)point{
+    if (self.hasSelection)
+        return;
     
-    return [self.objects objectAtIndex:self.objects.count-1];
+    self.hasSelection = YES;
+    self.selectedPoint = point;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(selectedNewPoint:)])
+        [self.delegate selectedNewPoint:self.selectedPoint];
 }
--(id)pop{
-    if (self.isEmpty)
-        return nil;
-    
-    id object = self.peek;
-    [self.objects removeObject:object];
-    return object;
+-(void)finishedSelection:(CGPoint)point{
+    if (!self.hasSelection)
+        return;
+    if (distanceFromPoints(self.selectedPoint, point)>self.minimumDrawDistance){
+        IEPointPair *pair = [IEPointPair pairWithPoints:self.selectedPoint second:point];
+        self.selectedPoint = CGPointMake(-99, -99);
+        self.hasSelection = NO;
+        [self.connections addObject:pair];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(didCreateConnection:)])
+            [self.delegate didCreateConnection:pair];
+    }
+    else{
+        self.hasSelection = NO;
+        if (self.delegate && [self.delegate respondsToSelector:@selector(deselectedPoint)])
+            [self.delegate deselectedPoint];
+        self.selectedPoint = CGPointMake(-99, -99);
+    }
 }
--(void)pushObject:(id)object{
-    [self.objects addObject:object];
+-(void)addPair:(IEPointPair *)pair{
+    [self.connections addObject:pair];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didCreateConnection:)])
+        [self.delegate didCreateConnection:pair];
 }
--(BOOL)isEmpty{
-    return self.objects.count==0;
+-(void)removePair:(IEPointPair *)pair{
+    [self.connections removeObject:pair];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didRemoveConnection:)])
+        [self.delegate didRemoveConnection:pair];
 }
+-(IEPointPair*)connectionClosestToPoint:(CGPoint)point{
+    CGFloat minDistance = self.minimumDrawDistance;
+    IEPointPair *saved = nil;
+    for (IEPointPair *pair in self.connections){
+        IELineSegment segment = IELineSegmentMake(pair.first, pair.second);
+        CGFloat distance = distanceFromPointToLine(segment, point);
+        if (distance<minDistance){
+            minDistance = distance;
+            saved = pair;
+        }
+    }
+    return saved;
+}
+
 
 @end

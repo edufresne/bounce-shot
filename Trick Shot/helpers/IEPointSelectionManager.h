@@ -34,6 +34,19 @@
 -(IEPointPair*)connectionClosestToPoint:(CGPoint)point; //Returns nil if distance from point > maxDistance
 -(BOOL)containsPair:(IEPointPair*)pair;
 @end
+@interface IESimpleSelectionManager : NSObject
+@property (weak, nonatomic) id<IEPointSelectionDelegate> delegate;
+@property (assign, nonatomic) CGPoint selectedPoint;
+@property (assign, nonatomic) BOOL hasSelection;
+@property (strong, nonatomic) NSMutableArray *connections;
+@property (assign, nonatomic) CGFloat minimumDrawDistance;
+
+-(void)startedSelection:(CGPoint)point;
+-(void)finishedSelection:(CGPoint)point;
+-(void)addPair:(IEPointPair*)pair;
+-(void)removePair:(IEPointPair*)pair;
+-(IEPointPair*)connectionClosestToPoint:(CGPoint)point;
+@end
 
 @interface IEPointPair : NSObject
 @property (assign, nonatomic) CGPoint first;
@@ -45,15 +58,5 @@
 +(instancetype)pairWithPoints:(CGPoint)first second:(CGPoint)second;
 -(BOOL)containsNode:(SKNode*)node;
 -(BOOL)equalsPointPair:(IEPointPair*)pair;
-@end
 
-
-@interface IEStack : NSObject
--(id)initEmpty;
-+(instancetype)emptyStack;
-
--(BOOL)isEmpty;
--(id)peek;
--(id)pop;
--(void)pushObject:(id)object;
 @end

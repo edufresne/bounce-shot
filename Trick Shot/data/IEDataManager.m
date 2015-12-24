@@ -8,6 +8,7 @@
 
 #import "IEDataManager.h"
 #import "AppDelegate.h"
+#import "Flurry.h"
 #define LEVEL_PER_TIER 20
 
 @implementation IEDataManager
@@ -22,16 +23,24 @@
 }
 -(id)init{
     if (self = [super init]){
+#warning change to highest unlock of 1
         self.hasRanBefore = [[NSUserDefaults standardUserDefaults] boolForKey:@"hasRanBefore"];
         if (!self.hasRanBefore){
+            self.powerupMap = [NSMutableDictionary dictionary];
+            for (int k = 0;k<10;k++){
+                NSString *key = [IEDataManager keyForPowerupType:(IEPowerupType)k];
+                if (key != nil)
+                    [self.powerupMap setValue:[NSNumber numberWithBool:NO] forKey:key];
+            }
             self.highestUnlock = 1;
             self.levelSkips = 1;
+            self.highestUnlock = 1000;
             [[NSUserDefaults standardUserDefaults] setInteger:self.levelSkips forKey:@"levelSkips"];
             [[NSUserDefaults standardUserDefaults] setInteger:self.highestUnlock forKey:@"highestUnlock"];
             self.hasRanBefore = YES;
             self.showTutorial = YES;
             [[NSUserDefaults standardUserDefaults] setBool:self.hasRanBefore forKey:@"hasRanBefore"];
-            self.localLevelCount = 100;
+            self.localLevelCount = 102;
 
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 NSDate *date = [NSDate date];
@@ -100,6 +109,7 @@
     if (self.levelSkips > 0){
         self.levelSkips--;
         [[NSUserDefaults standardUserDefaults] setInteger:self.levelSkips forKey:@"levelSkips"];
+        [Flurry logEvent:@"Skipped Level" withParameters:[NSDictionary dictionaryWithObject:[NSNumber numberWithInteger:self.highestUnlock] forKey:@"Level"]];
         [self advanceLevel];
     }
     else
@@ -144,6 +154,22 @@
         sum+=[self starsForLevel:k];
     }
     return sum;
+}
++(NSString*)keyForPowerupType:(IEPowerupType)type{
+    if (type == IEPowerupAimAndFire)
+        return @"IEPowerupAimAndFireKey";
+    else if (type == IEPowerupGravity)
+        return @"IEPowerupGravityKey";
+    else if (type == IEPowerupGhost)
+        return @"IEPowerupGhostKey";
+    else if (type == IEPowerupImmune)
+        return @"IEPowerupImmuneKey";
+    else if (type == IEPowerupKey)
+        return @"IEPowerupKeyKey";
+    else if (type == IEPowerupTilt)
+        return @"IEPowerupTiltKey";
+    else
+        return nil;
 }
 -(void)initializeController:(IEBounceLevelController*)controller{
     if (controller.levelNumber == 1){
@@ -329,56 +355,22 @@
         controller.starQuantitys = IEStarQuantityCreate(5, 4, 3);
     }
     else if (controller.levelNumber == 15){
-        controller.levelName = @"Shoty Architecture";
-        controller.ballAngle = M_PI*3/2;
-        controller.ballLocation = IEObjectLayoutTop;
-        controller.holeLayout = IEObjectLayoutBottomRight;
-        NSMutableArray *array = [NSMutableArray array];
-        for (int k = 0;k<3;k++){
-            IEObjectPointPair *pair = [IEObjectPointPair pairWithShift:CGPointZero shapeName:IEShapeNameRectangleThin textureName:IETextureTypeSolid];
-            if (k == 0){
-                pair.shiftPoint = CGPointMake(0, 0.25);
-                pair.rotation = M_PI/8;
-            }
-            else if (k == 1){
-                pair.shiftPoint = CGPointMake(1.2, 0.10);
-                pair.rotation = -M_PI/8;
-            }
-            else{
-                pair.shiftPoint = CGPointMake(0, 0.75);
-                pair.rotation = -M_PI/16;
-            }
-            [array addObject:pair];
-        }
-        [controller addPairs:array];
-        controller.starQuantitys = IEStarQuantityCreate(8, 6, 4);
+        controller.ballAngle = M_PI_2*5/6;
+        controller.ballLocation = IEObjectLayoutBottomLeft;
+        controller.holeLayout = IEObjectLayoutDiagonalBottomRight;
+        controller.levelName = @"Cave";
+        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.35,0),(0.65,0),(0.65,0.3),(0.5,0.4),(0.35,0.3)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.35,1),(0.65,1),(0.65,0.7),(0.5,0.6),(0.35,0.7)" texture:IETextureTypeSolid]]];
+        controller.starQuantitys = IEStarQuantityCreate(6, 5, 4);
     }
     else if (controller.levelNumber == 16){
-        controller.levelName = @"Shoty Architecture Pt 2";
-        controller.ballAngle = M_PI_2-M_PI/12;
-        controller.ballLocation = IEObjectLayoutBottomLeft;
-        controller.holeLayout = IEObjectLayoutTopRight;
-        NSMutableArray *array = [NSMutableArray array];
-        
-        for (int k = 0;k<3;k++){
-            IEObjectPointPair *pair = [IEObjectPointPair pairWithShift:CGPointZero shapeName:IEShapeNameRectangleThin textureName:IETextureTypeSolid];
-            pair.scale = 0.6;
-            if (k == 0){
-                pair.shiftPoint = CGPointMake(0.081, 0.197);
-                pair.rotation = 5.934;
-            }
-            else if (k == 1){
-                pair.shiftPoint = CGPointMake(0.597, 0.84);
-                pair.rotation = 1.83;
-            }
-            else{
-                pair.shiftPoint = CGPointMake(0.80, 0.36);
-                pair.rotation = 2.97;
-            }
-            [array addObject:pair];
-        }
-        [controller addPairs:array];
-        controller.starQuantitys = IEStarQuantityCreate(15, 9, 6);
+        controller.levelName = @"Angler";
+        controller.ballLocation = IEObjectLayoutBottom;
+        controller.holeLayout = IEObjectLayoutCustom;
+        AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+        [delegate storeShiftPoint:CGPointMake(0.5, 0.65) forIntegerKey:controller.levelNumber ball:NO];
+        controller.ballAngle = M_PI_2;
+        [controller addPath:[IECustomPath pathWithPointsFromString:@"(0.25,0.5),(0.75,0.5),(0.75,0.65),(0.65,0.6),(0.35,0.6),(0.25,0.65)" texture:IETextureTypeSolid]];
+        [controller addPair:[IEObjectPointPair pairWithShift:CGPointMake(0.5, 0.8) shapeName:IEShapeNameSquare textureName:IETextureTypeSolid]];
     }
     else if (controller.levelNumber == 17){
         controller.levelName = @"Lava lamp";
@@ -1982,6 +1974,58 @@
         [controller addPowerups:@[[IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointMake(0.68, 0.725)], [IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointMake(0.95, 0.65)]]];
         [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.63,0.9),(0.75,0.9),(0.63,0.85)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.85,0.75),(0.95,0.9),(1,0.9),(1,0.75)" texture:IETextureTypeSolid]]];
         
+    }
+    else if (controller.levelNumber == 101){
+        controller.levelName = @"Shoty Architecture";
+        controller.ballAngle = M_PI*3/2;
+        controller.ballLocation = IEObjectLayoutTop;
+        controller.holeLayout = IEObjectLayoutBottomRight;
+        NSMutableArray *array = [NSMutableArray array];
+        for (int k = 0;k<3;k++){
+            IEObjectPointPair *pair = [IEObjectPointPair pairWithShift:CGPointZero shapeName:IEShapeNameRectangleThin textureName:IETextureTypeSolid];
+            if (k == 0){
+                pair.shiftPoint = CGPointMake(0, 0.25);
+                pair.rotation = M_PI/8;
+            }
+            else if (k == 1){
+                pair.shiftPoint = CGPointMake(1.2, 0.10);
+                pair.rotation = -M_PI/8;
+            }
+            else{
+                pair.shiftPoint = CGPointMake(0, 0.75);
+                pair.rotation = -M_PI/16;
+            }
+            [array addObject:pair];
+        }
+        [controller addPairs:array];
+        controller.starQuantitys = IEStarQuantityCreate(8, 6, 4);
+    }
+    else if (controller.levelNumber == 102){
+        controller.levelName = @"Shoty Architecture Pt 2";
+        controller.ballAngle = M_PI_2-M_PI/12;
+        controller.ballLocation = IEObjectLayoutBottomLeft;
+        controller.holeLayout = IEObjectLayoutTopRight;
+        NSMutableArray *array = [NSMutableArray array];
+        
+        for (int k = 0;k<3;k++){
+            IEObjectPointPair *pair = [IEObjectPointPair pairWithShift:CGPointZero shapeName:IEShapeNameRectangleThin textureName:IETextureTypeSolid];
+            pair.scale = 0.6;
+            if (k == 0){
+                pair.shiftPoint = CGPointMake(0.081, 0.197);
+                pair.rotation = 5.934;
+            }
+            else if (k == 1){
+                pair.shiftPoint = CGPointMake(0.597, 0.84);
+                pair.rotation = 1.83;
+            }
+            else{
+                pair.shiftPoint = CGPointMake(0.80, 0.36);
+                pair.rotation = 2.97;
+            }
+            [array addObject:pair];
+        }
+        [controller addPairs:array];
+        controller.starQuantitys = IEStarQuantityCreate(15, 9, 6);
     }
     [controller saveLocally];
 }

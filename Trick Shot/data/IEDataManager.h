@@ -17,10 +17,13 @@
 @property (assign, nonatomic) BOOL showTutorial;
 @property (assign, nonatomic) NSUInteger localLevelCount;
 @property (assign, nonatomic) NSUInteger levelSkips;
+@property (strong, nonatomic) NSMutableDictionary *powerupMap;
 +(IEDataManager*)sharedManager;
 -(void)completedLevel:(NSUInteger)level withStars:(NSUInteger)stars;
 -(void)skippedLevel;
 -(void)purchasedSkips;
 -(NSUInteger)starsForLevel:(NSUInteger)level;
 -(NSUInteger)starCount;
++(NSString*)keyForPowerupType:(IEPowerupType)type;
+
 @end

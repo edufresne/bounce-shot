@@ -46,7 +46,7 @@
     manager.showTutorial = NO;
     [self.pageController.view removeFromSuperview];
     [self.pageController removeFromParentViewController];
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:NO completion:nil];
 }
 #pragma mark - UIPageViewController Data Source
 -(UIViewController*)pageViewController:(UIPageViewController *)pageViewController viewControllerAfterViewController:(UIViewController *)viewController{

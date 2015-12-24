@@ -47,7 +47,11 @@
 		07B1F7871BF801D700DEE6A7 /* NewLevelSelectScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B1F7861BF801D700DEE6A7 /* NewLevelSelectScene.m */; };
 		07B1F7891BF8052800DEE6A7 /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B1F7881BF8052800DEE6A7 /* SpriteKit.framework */; };
 		07B1F78B1BF8052F00DEE6A7 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B1F78A1BF8052F00DEE6A7 /* CoreMotion.framework */; };
+		07C6A9001C2516860020B894 /* dialogue.atlas in Resources */ = {isa = PBXBuildFile; fileRef = 07C6A8FF1C2516860020B894 /* dialogue.atlas */; };
 		07EBD2961BFC704C0016DE31 /* SettingsScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07EBD2951BFC704C0016DE31 /* SettingsScene.m */; };
+		07EBD2991BFCA6570016DE31 /* exit_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 07EBD2971BFCA6570016DE31 /* exit_button.png */; };
+		07FD7B6E1C26C6AA00D64CE3 /* SurvivalScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FD7B6D1C26C6AA00D64CE3 /* SurvivalScene.m */; };
+		07FD7B711C26CC8500D64CE3 /* IETimeLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FD7B701C26CC8500D64CE3 /* IETimeLabel.m */; };
 		40B5BA5325C14911351611B3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 45F67282608FB510DA543BFA /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -108,8 +112,14 @@
 		07B1F7861BF801D700DEE6A7 /* NewLevelSelectScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewLevelSelectScene.m; path = scenes/NewLevelSelectScene.m; sourceTree = "<group>"; };
 		07B1F7881BF8052800DEE6A7 /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = System/Library/Frameworks/SpriteKit.framework; sourceTree = SDKROOT; };
 		07B1F78A1BF8052F00DEE6A7 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
+		07C6A8FF1C2516860020B894 /* dialogue.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; name = dialogue.atlas; path = resources/dialogue.atlas; sourceTree = "<group>"; };
 		07EBD2941BFC704B0016DE31 /* SettingsScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsScene.h; sourceTree = "<group>"; };
 		07EBD2951BFC704C0016DE31 /* SettingsScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsScene.m; sourceTree = "<group>"; };
+		07EBD2971BFCA6570016DE31 /* exit_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = exit_button.png; path = resources/exit_button.png; sourceTree = "<group>"; };
+		07FD7B6C1C26C6AA00D64CE3 /* SurvivalScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurvivalScene.h; sourceTree = "<group>"; };
+		07FD7B6D1C26C6AA00D64CE3 /* SurvivalScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SurvivalScene.m; sourceTree = "<group>"; };
+		07FD7B6F1C26CC8500D64CE3 /* IETimeLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IETimeLabel.h; sourceTree = "<group>"; };
+		07FD7B701C26CC8500D64CE3 /* IETimeLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IETimeLabel.m; sourceTree = "<group>"; };
 		45F67282608FB510DA543BFA /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
@@ -203,6 +213,8 @@
 				07B1F7411BF8006F00DEE6A7 /* MainScene.m */,
 				07B1F7421BF8006F00DEE6A7 /* MenuScene.h */,
 				07B1F7431BF8006F00DEE6A7 /* MenuScene.m */,
+				07FD7B6C1C26C6AA00D64CE3 /* SurvivalScene.h */,
+				07FD7B6D1C26C6AA00D64CE3 /* SurvivalScene.m */,
 				07EBD2941BFC704B0016DE31 /* SettingsScene.h */,
 				07EBD2951BFC704C0016DE31 /* SettingsScene.m */,
 			);
@@ -226,6 +238,8 @@
 		07B1F7591BF800E400DEE6A7 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				07C6A8FF1C2516860020B894 /* dialogue.atlas */,
+				07EBD2971BFCA6570016DE31 /* exit_button.png */,
 				078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */,
 				07B1F76A1BF8010900DEE6A7 /* tut screens */,
 				07B1F75A1BF800FA00DEE6A7 /* arrow_light.png */,
@@ -273,6 +287,8 @@
 				07B1F7721BF8011B00DEE6A7 /* IEPortal.m */,
 				07B1F7731BF8011B00DEE6A7 /* IEPowerup.h */,
 				07B1F7741BF8011B00DEE6A7 /* IEPowerup.m */,
+				07FD7B6F1C26CC8500D64CE3 /* IETimeLabel.h */,
+				07FD7B701C26CC8500D64CE3 /* IETimeLabel.m */,
 			);
 			name = helpers;
 			sourceTree = "<group>";
@@ -374,6 +390,8 @@
 				07B1F7661BF8010100DEE6A7 /* tutscreen2.jpg in Resources */,
 				07B1F7561BF800A100DEE6A7 /* restart.png in Resources */,
 				07B1F7571BF800A100DEE6A7 /* retsart_selected.png in Resources */,
+				07C6A9001C2516860020B894 /* dialogue.atlas in Resources */,
+				07EBD2991BFCA6570016DE31 /* exit_button.png in Resources */,
 				07B1F7651BF8010100DEE6A7 /* tutscreen1.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -440,11 +458,13 @@
 				07B1F7871BF801D700DEE6A7 /* NewLevelSelectScene.m in Sources */,
 				07B1F71F1BF7FEC400DEE6A7 /* ViewController.m in Sources */,
 				07B1F77F1BF8012D00DEE6A7 /* IEButton.m in Sources */,
+				07FD7B711C26CC8500D64CE3 /* IETimeLabel.m in Sources */,
 				07B1F7781BF8011B00DEE6A7 /* IEPortal.m in Sources */,
 				07B1F7791BF8011B00DEE6A7 /* IEPowerup.m in Sources */,
 				07B1F7771BF8011B00DEE6A7 /* IEDataManager.m in Sources */,
 				07B1F7761BF8011B00DEE6A7 /* IECustomPath.m in Sources */,
 				07B1F73A1BF8005E00DEE6A7 /* TutorialContentViewController.m in Sources */,
+				07FD7B6E1C26C6AA00D64CE3 /* SurvivalScene.m in Sources */,
 				07B1F7801BF8012D00DEE6A7 /* IEPointSelectionManager.m in Sources */,
 				07B1F7451BF8006F00DEE6A7 /* MainScene.m in Sources */,
 				07B1F71C1BF7FEC400DEE6A7 /* AppDelegate.m in Sources */,

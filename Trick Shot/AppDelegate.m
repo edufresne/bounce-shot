@@ -10,6 +10,7 @@
 #import "IEDataManager.h"
 #import <GameKit/GameKit.h>
 #import "Reachability.h"
+#import "Flurry.h"
 
 @interface AppDelegate ()
 {
@@ -80,6 +81,7 @@
     [[UIPageControl appearance] setCurrentPageIndicatorTintColor:[UIColor darkGrayColor]];
     [[UIPageControl appearance] setPageIndicatorTintColor:[UIColor colorWithRed:0.666 green:0.666 blue:0.666 alpha:0.5]];
     [self authenticate];
+    [Flurry startSession:@"R6XKS3QWDQGCTB42ZFR4"];
     return YES;
 }
 #pragma mark - Game Center Methods

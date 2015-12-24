@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9060" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9051"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -28,11 +28,9 @@
                         <subviews>
                             <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="3" translatesAutoresizingMaskIntoConstraints="NO" id="7JW-GE-enD">
                                 <rect key="frame" x="281" y="533" width="39" height="37"/>
-                                <animations/>
                             </pageControl>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K3L-AW-1ts">
                                 <rect key="frame" x="426" y="28" width="139" height="48"/>
-                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="139" id="5gP-lA-2Tg"/>
                                     <constraint firstAttribute="height" constant="48" id="Z0N-ag-2QV"/>
@@ -47,7 +45,6 @@
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="D8L-eN-Ip6">
                                 <rect key="frame" x="231" y="552" width="139" height="48"/>
-                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="139" id="kPx-vr-Q21"/>
                                     <constraint firstAttribute="height" constant="48" id="yk4-CV-VKL"/>
@@ -61,7 +58,6 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="7JW-GE-enD" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Ayq-VB-XGx"/>
@@ -76,7 +72,7 @@
                         <outlet property="backButton" destination="D8L-eN-Ip6" id="Dpm-oT-jQF"/>
                         <outlet property="pageControl" destination="7JW-GE-enD" id="tWe-pP-Jwi"/>
                         <outlet property="skipLevels" destination="K3L-AW-1ts" id="PNW-D9-BI7"/>
-                        <segue destination="QFf-NM-0yi" kind="show" identifier="showTutorial" id="feV-lo-Tgv"/>
+                        <segue destination="QFf-NM-0yi" kind="presentation" identifier="showTutorial" id="feV-lo-Tgv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -97,7 +93,6 @@
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a1L-mY-rsq">
                                 <rect key="frame" x="231" y="552" width="139" height="48"/>
-                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="Phf-Lc-lRH"/>
                                     <constraint firstAttribute="width" constant="139" id="sBF-i9-yiA"/>
@@ -111,7 +106,6 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="a1L-mY-rsq" firstAttribute="centerX" secondItem="MGi-Rt-qSW" secondAttribute="centerX" id="JKC-te-9xH"/>
@@ -137,7 +131,6 @@
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yBI-bK-nwH">
                                 <rect key="frame" x="151" y="34" width="298" height="531"/>
-                                <animations/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="298" id="0SF-eF-73v"/>
                                     <constraint firstAttribute="height" constant="531" id="Se3-AB-tLK"/>
@@ -145,7 +138,6 @@
                                 </constraints>
                             </imageView>
                         </subviews>
-                        <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="centerX" secondItem="6hZ-tE-lFq" secondAttribute="centerX" id="AV7-aZ-o14"/>

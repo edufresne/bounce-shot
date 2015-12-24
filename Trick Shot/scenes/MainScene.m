@@ -13,6 +13,7 @@
 #import "AppDelegate.h"
 #import "ViewController.h"
 #import <CoreMotion/CoreMotion.h>
+#import "Flurry.h"
 
 #define BALL_ARROW_SPACING 15.0
 #define MASS_CONSTANT 0.035744
@@ -77,6 +78,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 /*Method called when the scene is presented to an SKView. Initializes enums and calls createSceneContent */
 -(void)didMoveToView:(SKView *)view{
     if (!self.contentCreated){
+        [Flurry logEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObject:@"Level" forKey:[NSNumber numberWithInteger:self.controller.levelNumber]] timed:YES];
         self.gameState = GameStatePlacingItems;
         self.menuState = MenuStateHidden;
         self.contentCreated = YES;
@@ -905,6 +907,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             stars = 3;
         else if (self.currentHits<=self.controller.starQuantitys.twoStars)
             stars = 2;
+        [Flurry endTimedEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Level", [NSNumber numberWithInteger:self.controller.levelNumber], @"Stars", [NSNumber numberWithInteger:stars], @"Did Exit", [NSNumber numberWithBool:NO], nil]];
         IEDataManager *manager = [IEDataManager sharedManager];
         [manager completedLevel:self.controller.levelNumber withStars:stars];
         label.text = [NSString stringWithFormat:@"Level: %i Completed!", (int)self.controller.levelNumber];
@@ -944,6 +947,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:0.5+0.25*k], [SKAction moveByX:0 y:-sprite.size.height/2-self.size.height*1/4 duration:0.25]]]];
         }
     }
+    else
+        [Flurry endTimedEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Level", [NSNumber numberWithInteger:self.controller.levelNumber], @"Stars", [NSNumber numberWithInteger:0], @"Exited", [NSNumber numberWithBool:NO], nil]];
 }
 
 /*Selection Manager delegate calls methods on user point selection and connection creation */
@@ -1025,6 +1030,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 /*When any button was pressed by the user. Passes the id of the button */
 -(void)buttonWasPressed:(id)button{
     IETextureButton *node = (IETextureButton*)button;
+    
+    if (self.gameState != GameStateWon && self.gameState != GameStateLost)
+        [Flurry endTimedEvent:@"Played Level" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Level", [NSNumber numberWithInteger:self.controller.levelNumber], @"Stars", [NSNumber numberWithInteger:0], @"Exited", [NSNumber numberWithBool:YES], nil]];
+    
     if ([node.name isEqualToString:@"restartButton"]){
         MainScene *scene = [[MainScene alloc] initWithSize:self.view.bounds.size];
         scene.colorIndex = self.colorIndex;
@@ -1430,7 +1439,7 @@ static inline CGVector createAngledVector(CGFloat magnitude, CGFloat angle){
     return CGVectorMake(magnitude*cosf(angle), magnitude*sinf(angle));
 }
 /*Calculates float value of the distance between two 2d points */
-CGFloat distanceFromPointToPoint(CGPoint first, CGPoint second){
+static inline CGFloat distanceFromPointToPoint(CGPoint first, CGPoint second){
     return sqrtf(powf(first.x-second.x, 2)+powf(first.y-second.y, 2));
 }
 /*Converts an IEObject layout variable to a usable point for the scene */

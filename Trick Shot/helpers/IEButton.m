@@ -27,8 +27,10 @@
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
     self.isSelected = YES;
     [self runAction:[SKAction setTexture:self.selectedTexture]];
-    if (self.enlargesWhenPressed)
-        self.size = CGSizeMake(self.size.width*self.enlargePercentage, self.size.height*self.enlargePercentage);
+    if (self.enlargesWhenPressed){
+        self.xScale = self.enlargePercentage;
+        self.yScale = self.enlargePercentage;
+    }
     if (self.delegate&&[self.delegate respondsToSelector:@selector(buttonWasPressed:)])
         [self.delegate buttonWasPressed:self];
 }
@@ -38,8 +40,10 @@
     if (!CGRectContainsPoint(self.frame, location)){
         self.isSelected = NO;
         [self runAction:[SKAction setTexture:self.defaultTexture]];
-        if (self.enlargesWhenPressed)
-            self.size = CGSizeMake(self.size.width/self.enlargePercentage, self.size.height/self.enlargePercentage);
+        if (self.enlargesWhenPressed){
+            self.xScale = 1;
+            self.yScale = 1;
+        }
         if (self.delegate&&[self.delegate respondsToSelector:@selector(buttonWasReleased:)])
             [self.delegate buttonWasReleased:self];
     }
@@ -47,16 +51,20 @@
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     self.isSelected = NO;
     [self runAction:[SKAction setTexture:self.defaultTexture]];
-    if (self.enlargesWhenPressed)
-        self.size = CGSizeMake(self.size.width*self.enlargePercentage, self.size.height*self.enlargePercentage);
+    if (self.enlargesWhenPressed){
+        self.xScale = 1;
+        self.yScale = 1;
+    }
     if (self.delegate&&[self.delegate respondsToSelector:@selector(buttonWasPressed:)])
         [self.delegate buttonWasPressed:self];
 }
 -(void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event{
     self.isSelected = NO;
     [self runAction:[SKAction setTexture:self.defaultTexture]];
-    if (self.enlargesWhenPressed)
-        self.size = CGSizeMake(self.size.width*self.enlargePercentage, self.size.height*self.enlargePercentage);
+    if (self.enlargesWhenPressed){
+        self.xScale = 1;
+        self.yScale = 1;
+    }
     if (self.delegate&&[self.delegate respondsToSelector:@selector(buttonWasPressed:)])
         [self.delegate buttonWasPressed:self];
 }

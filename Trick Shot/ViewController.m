@@ -12,8 +12,9 @@
 #import "IEDataManager.h"
 #import "AppDelegate.h"
 #import "NewLevelSelectScene.h"
+#import "Flurry.h"
 //Set to YES if FPS and other debug info should be shown 
-#define scenedebug NO
+#define scenedebug YES
 #define SESSIONS_PER_AD 4
 
 @interface ViewController ()
@@ -111,11 +112,15 @@
 //called if back button is pressed. Goes back to MainMenuScene
 - (IBAction)backButtonPressed:(id)sender {
     SKView *view = (SKView*)self.view;
-    NewLevelSelectScene *scene = (NewLevelSelectScene*)view.scene;
-    [scene prepareToLeave];
+    if ([view.scene respondsToSelector:@selector(prepareToLeave)]){
+        NewLevelSelectScene *scene = (NewLevelSelectScene*)view.scene;
+        [scene prepareToLeave];
+    }
+    
     MenuScene *newScene = [[MenuScene alloc] initWithSize:self.view.bounds.size];
-    newScene.scaleMode = scene.scaleMode;
+    newScene.scaleMode = SKSceneScaleModeAspectFill;
     [view presentScene:newScene];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"hidePageControl" object:nil];
 }
 
 //starts alertcontroller if no skips left, or confirms use of level skip if skips left. If passed nil as sender no confirmation is given.

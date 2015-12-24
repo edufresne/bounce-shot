@@ -76,4 +76,14 @@
 +(NSArray*)textureNamesInOrder{
     return [NSArray arrayWithObjects:@"icon_aim", @"icon_gravity", @"icon_key", @"icon_ghost", @"icon_invincible", @"icon_tilt", nil];
 }
++(NSArray*)powerupTypeStrings{
+    IEPowerupType arr[6] = {IEPowerupAimAndFire, IEPowerupGravity, IEPowerupKey, IEPowerupGhost, IEPowerupImmune, IEPowerupTilt};
+    NSMutableArray *array = [NSMutableArray array];
+    for (int k = 0;k<6;k++){
+        NSUInteger integer = (NSUInteger)arr[k];
+        NSString *string = [NSString stringWithFormat:@"%i", (int)integer];
+        [array addObject:string];
+    }
+    return (NSArray*)array;
+}
 @end
