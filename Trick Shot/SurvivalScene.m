@@ -16,6 +16,8 @@
 #define GRAVITY_FIRE_MULTIPLIER 2.9
 #define INITIAL_SPEED 10.0
 #define DIM_FACTOR_POWERUP 12
+#define POWERUP_VANISH_TIME 8.0
+#define OBSTACLE_VANISH_TIME 12.0
 
 @interface SurvivalScene ()
 {
@@ -24,19 +26,18 @@
     SKSpriteNode *menuList;
     CGFloat storedTheta;
     NSTimer *timeout;
-    NSInteger powerupsOn;
 }
 @property (strong, nonatomic) SKSpriteNode *circle;
 @property (strong, nonatomic) SKTexture *dotTexture;
 @property (strong, nonatomic) SKSpriteNode *selectionSprite;
 @property (strong, nonatomic) SKSpriteNode *spriteNodeWithTexture;
-@property (strong, nonatomic) IEPointSelectionManager *manager;
+@property (strong, nonatomic) IESimpleSelectionManager *manager;
 @property (strong, nonatomic) NSMutableArray *currentObjects;
-@property (assign, nonatomic) BOOL ghost;
+@property (assign, nonatomic) BOOL powerupExists;
 @property (strong, nonatomic) SKShapeNode *dragShape;
 @end
 @implementation SurvivalScene
-@synthesize circle, ghost;
+@synthesize circle;
 static const uint32_t ballCategory = 0x1 << 0;
 static const uint32_t edgeCategory = 0x1 << 1;
 static const uint32_t powerupCategory = 0x1 << 2;
@@ -44,7 +45,6 @@ static const uint32_t instaDeathCategory = 0x1 << 3;
 static const uint32_t invincibleCategory = 0x1 << 4;
 
 -(void)didMoveToView:(SKView *)view{
-    powerupsOn = 0;
     self.currentObjects = [[NSMutableArray alloc]init];
     self.gameState = GameStateStart;
     AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -131,17 +131,25 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     timeLabel.fontColor =  [SKColor darkGrayColor];
     [self addChild:timeLabel];
     
-    self.manager = [[IEPointSelectionManager alloc] init];
-    self.manager.maxDistance = 20;
+    self.manager = [[IESimpleSelectionManager alloc] init];
     self.manager.delegate = self;
 }
 -(void)powerupDidEndWithType:(IEPowerupType)type{
-    powerupsOn--;
+    self.powerupExists = NO;
     if (type == IEPowerupGravity){
+        NSMutableArray *array = [NSMutableArray array];
+        [array addObjectsFromArray:self.manager.connections];
+        for (IEPointPair *pair in array){
+            [self.manager removePair:pair];
+        }
         self.physicsWorld.gravity = CGVectorZero();
-        CGVector storedVelocity = self.circle.physicsBody.velocity;
+        
         self.circle.physicsBody.velocity = CGVectorMake(0, 0);
-        self.circle.physicsBody.affectedByGravity = NO;
+        circle.physicsBody.linearDamping = 0;
+        circle.physicsBody.angularDamping = 0;
+        circle.physicsBody.restitution = 1;
+        circle.physicsBody.friction = 0;
+        
         self.gameState = GameStateWaitingForTouch;
         CGFloat distance = sqrtf(powf(self.size.width, 2)+powf(self.size.height, 2));
         laserPath = [SKShapeNode node];
@@ -151,9 +159,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         //TODO: change laser color
         UIBezierPath *path = [UIBezierPath bezierPath];
         [path moveToPoint:CGPointMake(self.circle.position.x, self.circle.position.y)];
-        storedTheta = atanf(storedVelocity.dy/storedVelocity.dx);
-        if (storedTheta<0)
-            storedTheta+=M_PI;
+        storedTheta = M_PI;
         
         [path addLineToPoint:CGPointMake(self.circle.position.x+distance*cosf(storedTheta), self.circle.position.y+distance*sinf(storedTheta))];
         laserPath.path = path.CGPath;
@@ -167,11 +173,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
             [laserPath removeFromParent];
             laserPath = nil;
             self.gameState = GameStatePlaying;
-            CGFloat speed;
-            if (noGravity)
-                speed = 12* FIRE_SPEED_MULTIPLIER;
-            else
-                speed = 12 * GRAVITY_FIRE_MULTIPLIER;
+            CGFloat speed = INITIAL_SPEED*1.25;
             [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
             self.circle.physicsBody.affectedByGravity = YES;
         }]]]];
@@ -179,6 +181,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     else if (type == IEPowerupImmune){
         [self.circle removeAllActions];
         self.circle.physicsBody.categoryBitMask = ballCategory;
+        self.circle.colorBlendFactor = 0;
     }
     else if (type == IEPowerupKey)
         self.physicsBody = nil;
@@ -232,9 +235,9 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                     self.gameState = GameStatePlaying;
                     CGFloat speed;
                     if (noGravity)
-                        speed = 12* FIRE_SPEED_MULTIPLIER;
+                        speed = INITIAL_SPEED*1.25;
                     else
-                        speed = 12 * GRAVITY_FIRE_MULTIPLIER;
+                        speed = INITIAL_SPEED*1.25;
                     [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
                     self.circle.physicsBody.affectedByGravity = YES;
                 }]]]];
@@ -264,13 +267,12 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                 self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:CGRectMake(self.size.width/60, self.size.width/60, self.size.width-2*self.size.width/60, self.size.height-2*self.size.width/60)];
             }
             else if (type == IEPowerupGravity){
-                self.physicsBody.friction = 0.2;
-                self.physicsBody.restitution = 0.2;
                 //Changed restitution of cirlcle from 0 to 0.2.
                 self.circle.physicsBody.restitution = 0.2;
                 self.circle.physicsBody.friction = 0.2;
                 self.circle.physicsBody.linearDamping = 0.1;
                 self.physicsWorld.gravity = CGVectorMake(4.5*cosf(powerup.zRotation+M_PI*3/2), 4.5*sinf(powerup.zRotation+M_PI*3/2));
+                self.circle.physicsBody.velocity = CGVectorZero();
                 for (IEPointPair *pair in self.manager.connections){
                     SKNode *node = pair.dot1;
                     node.physicsBody.restitution = 0.2;
@@ -294,7 +296,6 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                 [self powerupDidEndWithType:type];
             }]]]];
             if (powerup.powerupType != IEPowerupAimAndFire){
-                NSLog(@"Here");
                 IEPowerup *copy = [IEPowerup powerupWithType:powerup.powerupType shiftPoint:CGPointZero];
                 copy.size = CGSizeMake(0.8*self.size.width/DIM_FACTOR_POWERUP, 0.8*self.size.width/DIM_FACTOR_POWERUP);
                 copy.position = CGPointMake(self.size.width-copy.size.width/2-5, self.size.height-copy.size.height/2-5);
@@ -357,12 +358,12 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     else if (!self.dragShape && self.gameState == GameStatePlaying){
         SKNode *menu = [self childNodeWithName:@"restart"];
         CGFloat distance = distanceFromPointToPoint(menu.position, location);
-        if (distance<self.manager.maxDistance+menu.frame.size.width/2){
+        if (distance<self.manager.minimumDrawDistance+menu.frame.size.width/2){
             [self showContentList];
             // Pause
         }
         else{
-            [self.manager selectPoint:location pressed:YES];
+            [self.manager startedSelection:location];
         }
     }
 }
@@ -370,7 +371,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInNode:self];
     if (self.gameState == GameStatePlaying && self.menuState == MenuStateHidden){
-        if (!self.dragShape&&self.manager.inTouch){
+        if (!self.dragShape&&self.manager.hasSelection){
             //If the drag shape has not been created adn the manager has a selection it is initialized.
             self.dragShape = [SKShapeNode node];
             self.dragShape.strokeColor = [SKColor whiteColor];
@@ -379,7 +380,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         }
         // The drag shape has been already created so its path changes to the current touch of the user.
         CGMutablePathRef pathToDraw = CGPathCreateMutable();
-        CGPathMoveToPoint(pathToDraw, NULL, self.manager.firstTouch.x , self.manager.firstTouch.y);
+        CGPathMoveToPoint(pathToDraw, NULL, self.manager.selectedPoint.x , self.manager.selectedPoint.y);
         CGPathAddLineToPoint(pathToDraw, NULL, location.x, location.y);
         self.dragShape.path = pathToDraw;
     }
@@ -400,7 +401,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
             [self.dragShape removeFromParent];
             self.dragShape = nil;
         }
-        [self.manager selectPoint:location pressed:NO];
+        [self.manager finishedSelection:location];
     }
     else if (self.gameState == GameStateStart && self.menuState != MenuStateShowing){
         [circle.physicsBody applyImpulse:createAngledVector(INITIAL_SPEED, M_PI_2)];
@@ -512,7 +513,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
 /* Called when new point is made on a screen with no other point to pair */
 -(void)selectedNewPoint:(CGPoint)point{
     self.selectionSprite.position = point;
-    if (!self.selectionSprite.parent&&self.manager.inTouch)
+    if (!self.selectionSprite.parent&&self.manager.hasSelection)
         [self addChild:self.selectionSprite];
 }
 /* New point has been deselected leaving no new points on the screen */
@@ -531,8 +532,15 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     dot1.physicsBody.categoryBitMask = edgeCategory;
     dot1.physicsBody.collisionBitMask = 0x0;
     dot1.physicsBody.contactTestBitMask = ballCategory | edgeCategory;
-    dot1.physicsBody.friction = 0;
-    dot1.physicsBody.restitution = 1;
+    if (noGravity){
+        dot1.physicsBody.friction = 0;
+        dot1.physicsBody.restitution = 1;
+    }
+    else{
+        dot1.physicsBody.friction = 0.2;
+        dot1.physicsBody.restitution = 0.2;
+    }
+    
     [self addChild:dot1];
     
     SKSpriteNode *dot2 = [SKSpriteNode spriteNodeWithTexture:self.dotTexture];
@@ -586,29 +594,33 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     static int currentPowerups = 0;
     CGFloat probability;
     if (currentPowerups == 0)
-        probability = 0.05+currentTime/1000;
+        probability = 0.05+currentTime/100;
     else if (currentPowerups == 1)
-        probability = 0.025+currentTime/2000;
+        probability = 0.025+currentTime/200;
     else if (currentPowerups == 2)
-        probability = 0.01+currentTime/5000;
+        probability = 0.01+currentTime/5005;
     else
         probability = -1;
-    if (randomNumberBetween(1, 0)<0.25){
-        [self generatePowerup];
-        return;
-    }
+
     
     CGFloat rand = randomNumberBetween(1, 0);
     if (rand<probability){
-        NSLog(@"Generating Something");
+        if (randomNumberBetween(1, 0)<0.25 && !self.powerupExists){
+            [self generatePowerup];
+            return;
+        }
+        currentPowerups++;
+        [self runAction:[SKAction sequence:@[[SKAction waitForDuration:OBSTACLE_VANISH_TIME], [SKAction runBlock:^{
+            currentPowerups--;
+        }]]]];
         //Generate random obstacle
         BOOL instaDeath = arc4random()%2;
-        CGFloat scale = randomNumberBetween(1.5, 0.5);
+        CGFloat scale = randomNumberBetween(2, 1);
         CGPoint position;
         do{
             position = CGPointMake(randomNumberBetween(self.size.width-circle.size.width/2, circle.size.width/2), randomNumberBetween(self.size.height-circle.size.height/2, circle.size.height));
         }
-        while(distanceFromPointToPoint(circle.position, position)<100 && ![self nodeAtPoint: position]);
+        while(distanceFromPointToPoint(circle.position, position)<200 && ![self nodeAtPoint: position]);
         
         CGFloat rotation = randomNumberBetween(2*M_PI, 0);
         int type = arc4random()%3;
@@ -618,7 +630,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         sprite.yScale = scale;
         sprite.position = position;
         [self addChild:sprite];
-        [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:randomNumberBetween(8, 5)], [SKAction repeatAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0], [SKAction waitForDuration:0.25], [SKAction fadeAlphaTo:1 duration:0], [SKAction waitForDuration:0.25]]] count:8], [SKAction removeFromParent]]]];
+        [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:OBSTACLE_VANISH_TIME], [SKAction repeatAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0], [SKAction waitForDuration:0.25], [SKAction fadeAlphaTo:1 duration:0], [SKAction waitForDuration:0.25]]] count:8], [SKAction removeFromParent]]]];
     }
 }
 -(SKSpriteNode*)obstacleFromType:(ObstacleShape)shape instaDeath:(BOOL)instaDeath{
@@ -673,17 +685,15 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     }
     return spriteNode;
 }
-                
+
 -(void)generatePowerup{
+    self.powerupExists = YES;
     IEPowerup *powerup;
     int rand = arc4random()%4;
-    if (rand == 0){
+    if (rand == 0)
         powerup = [IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointZero];
-    }
-    else if (rand == 1){
+    else if (rand == 1)
         powerup = [IEPowerup powerupWithType:IEPowerupGravity shiftPoint:CGPointZero];
-        powerup.zRotation = randomNumberBetween(2*M_PI, 0);
-    }
     else if (rand == 2)
         powerup = [IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointZero];
     else
@@ -694,6 +704,14 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         position = CGPointMake(randomNumberBetween(self.size.width-powerup.size.width, powerup.size.width), randomNumberBetween(self.size.height-powerup.size.height, powerup.size.height));
     }
     while (![self nodeAtPoint:position]);
+    if (powerup.powerupType == IEPowerupGravity){
+        if (position.x<self.size.width/8)
+            powerup.zRotation = M_PI_2;
+        else if (position.x>self.size.width-self.size.width/8)
+            powerup.zRotation = -M_PI_2;
+        else if (position.y<self.size.height/2)
+            powerup.zRotation = M_PI;
+    }
     powerup.position = position;
     powerup.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:powerup.size];
     powerup.physicsBody.categoryBitMask = powerupCategory;
@@ -701,6 +719,12 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     powerup.physicsBody.collisionBitMask = 0x0;
     powerup.physicsBody.affectedByGravity = NO;
     powerup.physicsBody.dynamic = NO;
+    [powerup runAction:[SKAction sequence:@[[SKAction waitForDuration:OBSTACLE_VANISH_TIME], [SKAction repeatAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0], [SKAction waitForDuration:0.25], [SKAction fadeAlphaTo:1 duration:0], [SKAction waitForDuration:0.25]]] count:8], [SKAction runBlock:^{
+        if (powerup.parent!=nil)
+            [powerup removeFromParent];
+        self.powerupExists = NO;
+        //Needs Testing
+    }]]]];
     [self addChild:powerup];
 }
 

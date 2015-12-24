@@ -14,7 +14,7 @@
 #import "NewLevelSelectScene.h"
 #import "Flurry.h"
 //Set to YES if FPS and other debug info should be shown 
-#define scenedebug YES
+#define scenedebug NO
 #define SESSIONS_PER_AD 4
 
 @interface ViewController ()
@@ -93,9 +93,8 @@
         self.backButton.hidden = NO;
         self.pageControl.hidden = NO;
     }
-    else if ([notification.name isEqualToString:@"showInterstitial"]){
-        [self performSelector:@selector(showInterstitial) withObject:nil afterDelay:1.0];
-    }
+    else if ([notification.name isEqualToString:@"showInterstitial"])
+        [self showInterstitial];
 }
 
 //performs segue to TutorialViewController
