@@ -26,8 +26,9 @@
 #define SNAP_THRESHOLD 2.0
 #define noGravity ((self.physicsWorld.gravity.dx == 0) && (self.physicsWorld.gravity.dy == 0))
 
-#define ROLL_FACTOR 0.9
-#define PITCH_FACTOR 0.9
+#define kFilteringFactor 0.1
+#define kVelocityMultiplier 600.0
+#define EXIT_BTN_DIM 8.5
 
 @interface MainScene (){
     SKSpriteNode *menuList;
@@ -35,6 +36,9 @@
     SKShapeNode *laserPath;
     NSUInteger currentKeys;
     NSTimer *timeOut;
+    BOOL tilt;
+    double accelX;
+    double accelY;
 }
 @property BOOL contentCreated;
 @property BOOL ghost;
@@ -56,8 +60,10 @@
 @property (assign, nonatomic) NSUInteger currentHits;
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
-@property (assign, nonatomic) BOOL pitchSet;
-@property (assign, nonatomic) CGFloat initialPitch;
+
+@property (strong, nonatomic) SKTextureAtlas *popupAtlas;
+@property (strong, nonatomic) SKSpriteNode *popup;
+@property (strong, nonatomic) SKSpriteNode *blackMask;
 @end
 
 @implementation MainScene
@@ -79,6 +85,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 -(void)didMoveToView:(SKView *)view{
     if (!self.contentCreated){
         [Flurry logEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObject:@"Level" forKey:[NSNumber numberWithInteger:self.controller.levelNumber]] timed:YES];
+        self.popupAtlas = [SKTextureAtlas atlasNamed:@"dialogue.atlas"];
         self.gameState = GameStatePlacingItems;
         self.menuState = MenuStateHidden;
         self.contentCreated = YES;
@@ -256,8 +263,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         [self addChild:sprite];
         [self.pathSprites addObject:sprite];
     }
-    
+    NSDictionary *powerupKeys = [[IEDataManager sharedManager] powerupMap];
     currentKeys = 0;
+    IEPowerupType *type = NULL;
     for (IEPowerup *powerup in self.controller.decodedPowerups){
         if (powerup.powerupType == IEPowerupKey)
             currentKeys++;
@@ -271,10 +279,40 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         powerup.physicsBody.fieldBitMask = 0x0;
         [powerup runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction scaleTo:1.15 duration:1], [SKAction scaleTo:1 duration:1]]]]];
         [self addChild:powerup];
+        NSNumber *number = [powerupKeys objectForKey:[IEDataManager keyForPowerupType:powerup.powerupType]];
+        if (!number.boolValue && type == NULL){
+            IEPowerupType val = powerup.powerupType;
+            type = &val;
+        }
     }
     if (currentKeys != 0)
         [self setupKeys];
-    
+    if (type!=NULL){
+        self.popup = [self createPopUpWithType:*type];
+        self.blackMask = [SKSpriteNode spriteNodeWithColor:[SKColor blackColor] size:self.size];
+        self.blackMask.alpha = 0;
+        self.blackMask.position = CGPointMake(self.size.width/2, self.size.height/2);
+        self.blackMask.zPosition = 100;
+        self.popup.zPosition = 101;
+        [self addChild:self.blackMask];
+        [self addChild:self.popup];
+        
+        [self.popup runAction:[SKAction moveToY:self.size.height/2 duration:0.125]];
+        [self.blackMask runAction:[SKAction fadeAlphaTo:0.5 duration:0.25]];
+        [[IEDataManager sharedManager] viewedPowerup:*type];
+    }
+}
+-(void)dismissPopup{
+    [self.blackMask runAction:[SKAction fadeAlphaTo:0 duration:0.25]];
+    [self.popup runAction:[SKAction moveToY:-self.popup.size.height/2 duration:0.125]];
+    [self.blackMask runAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0.25], [SKAction runBlock:^{
+        [self.blackMask removeFromParent];
+        self.blackMask = nil;
+    }]]]];
+    [self.popup runAction:[SKAction sequence:@[[SKAction moveToY:-self.popup.size.height/2 duration:0.125], [SKAction runBlock:^{
+        [self.popup removeFromParent];
+        self.popup = nil;
+    }]]]];
 }
 -(void)setupKeys{
     for (int k = 0;k<currentKeys;k++){
@@ -387,7 +425,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             powerup.physicsBody = nil;
             IEPowerupType type = powerup.powerupType;
             if (type == IEPowerupAimAndFire){
-                
+                tilt = NO;
                 CGVector storedVelocity = self.circle.physicsBody.velocity;
                 self.circle.physicsBody.velocity = CGVectorMake(0, 0);
                 self.circle.physicsBody.affectedByGravity = NO;
@@ -442,8 +480,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 
             }
             else if (type == IEPowerupGravity){
+                tilt = NO;
                 if (self.motionManager){
-                    [self.motionManager stopDeviceMotionUpdates];
+                    [self.motionManager stopAccelerometerUpdates];
                     self.motionManager = nil;
                 }
                 self.physicsBody.friction = 0.2;
@@ -505,6 +544,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 self.circle.yScale /=2;
             }
             else if (type == IEPowerupTilt){
+                tilt = YES;
                 self.physicsBody.friction = 0.2;
                 self.physicsBody.restitution = 0.2;
                 self.circle.physicsBody.restitution = 0;
@@ -525,21 +565,20 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 }
                 self.currentHitLabel.text = @"Hits Left: --";
                 self.motionManager = [[CMMotionManager alloc] init];
-                self.motionManager.deviceMotionUpdateInterval = 1/60;
+                self.motionManager.accelerometerUpdateInterval = 1/60.0;
                 self.physicsWorld.gravity = CGVectorZero();
                 self.circle.physicsBody.velocity = CGVectorZero();
-                [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion * _Nullable motion, NSError * _Nullable error) {
-                    if (!error){
-                        CMAttitude *attitude = motion.attitude;
-                        if (!self.pitchSet){
-                            self.pitchSet = YES;
-                            self.initialPitch = attitude.pitch;
-                        }
-                        self.physicsWorld.gravity = CGVectorMake(ROLL_FACTOR*attitude.roll, PITCH_FACTOR*(self.initialPitch-attitude.pitch));
-                        NSLog(@"(%f, %f)", self.physicsWorld.gravity.dx, self.physicsWorld.gravity.dy);
+                [self.motionManager startAccelerometerUpdatesToQueue:[[NSOperationQueue alloc] init] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
+                    if (error)
+                        NSLog(@"No Gyroscope");
+                    else{
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            CMAcceleration acceleration = accelerometerData.acceleration;
+                            accelX = (acceleration.x*kFilteringFactor)+(accelX*(1-kFilteringFactor));
+                            accelY = (acceleration.y*kFilteringFactor)+(accelY*(1-kFilteringFactor));
+                            circle.physicsBody.velocity = CGVectorMake(accelX*kVelocityMultiplier, (accelY+0.4)*kVelocityMultiplier);
+                        });
                     }
-                    else
-                        NSLog(@"No Gryro");
                 }];
             }
             [powerup runAction:[SKAction sequence:@[[SKAction group:@[[SKAction fadeAlphaTo:0 duration:1], [SKAction scaleTo:1.4 duration:1]]], [SKAction removeFromParent]]]];
@@ -555,7 +594,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         else{
             //Bounces off any non hole object. Changes label
             
-            if (noGravity&&!self.pitchSet){
+            if (noGravity&& !tilt){
                 self.currentHits++;
                 self.currentHitLabel.text = [NSString stringWithFormat:@"Hits Left: %i", (int)(self.controller.starQuantitys.min-self.currentHits)];
             }
@@ -604,7 +643,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     }
 }
 -(void)update:(NSTimeInterval)currentTime{
-    if (!noGravity && !timeOut.valid && timeOut == nil && fabs(self.circle.physicsBody.velocity.dx) <= 0.25 && fabs(self.circle.physicsBody.velocity.dy) <= 0.25 && self.gameState == GameStateBallMoving &&!self.pitchSet){
+    if (!noGravity && !timeOut.valid && timeOut == nil && fabs(self.circle.physicsBody.velocity.dx) <= 0.25 && fabs(self.circle.physicsBody.velocity.dy) <= 0.25 && self.gameState == GameStateBallMoving &&!tilt){
         timeOut = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(checkTimeout) userInfo:nil repeats:NO];
     }
 }
@@ -627,6 +666,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     CGPoint location = [touch locationInNode:self];
     SKNode *node = [self nodeAtPoint:location];
     [self touchAnimationAtPoint:location];
+    if (self.popup && !CGRectContainsPoint(self.popup.frame, location)){
+        [self dismissPopup];
+    }
     if ([node.name isEqualToString:@"restart"]&&!(self.gameState == GameStateLost||self.gameState == GameStateWon)&&self.menuState==MenuStateHidden){
         // Menu button clicked
         [self showContentList];
@@ -767,6 +809,33 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 
 /* Methods for doing repeatitive tasks on the scene. This includes showing and hidng the menu and handling a win or a loss */
 #pragma mark - View Manager Methods
+-(SKSpriteNode*)createPopUpWithType:(IEPowerupType)type{
+        SKTexture *texture;
+        if (type == IEPowerupAimAndFire)
+            texture = [self.popupAtlas textureNamed:@"dialogue_aimandfire"];
+        else if (type == IEPowerupGhost)
+            texture = [self.popupAtlas textureNamed:@"dialogue_ghost"];
+        else if (type == IEPowerupGravity)
+            texture = [self.popupAtlas textureNamed:@"dialogue_gravity"];
+        else if (type == IEPowerupKey)
+            texture = [self.popupAtlas textureNamed:@"dialogue_key"];
+        else if (type == IEPowerupTilt)
+            texture = [self.popupAtlas  textureNamed:@"dialogue_tilt"];
+        else
+            texture = [self.popupAtlas textureNamed:@"dialogue_immunity"];
+        SKSpriteNode *spriteNode = [SKSpriteNode spriteNodeWithTexture:texture];
+        //Insert specific popup for specific type
+        spriteNode.size = CGSizeMake(self.size.width*3/4, self.size.width/2);
+        spriteNode.position = CGPointMake(self.size.width/2, -spriteNode.size.height/2);
+        SKTexture *exitTexture = [SKTexture textureWithImageNamed:@"exit_button"];
+        IETextureButton *exitButton = [IETextureButton buttonWithDefaultTexture:exitTexture selectedTexture:exitTexture];
+        exitButton.delegate = self;
+        exitButton.size = CGSizeMake(spriteNode.size.height/EXIT_BTN_DIM, spriteNode.size.height/EXIT_BTN_DIM);
+        exitButton.name = @"exitButton";
+        exitButton.position = CGPointMake(-spriteNode.size.width/2+exitButton.size.width/2, spriteNode.size.height/2-exitButton.size.height/2);
+        [spriteNode addChild:exitButton];
+        return spriteNode;
+}
 /*Shows menu if the menu is not showing from the left of the screen */
 -(void)showContentList{
     static BOOL initialized = NO;
@@ -833,7 +902,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 -(void)handleEndingState{
     [self hideContentList];
     if (self.motionManager){
-        [self.motionManager stopDeviceMotionUpdates];
+        [self.motionManager stopAccelerometerUpdates];
         self.motionManager = nil;
     }
     AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -1030,7 +1099,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 /*When any button was pressed by the user. Passes the id of the button */
 -(void)buttonWasPressed:(id)button{
     IETextureButton *node = (IETextureButton*)button;
-    
+    if (self.popup && [node.name isEqualToString:@"exitButton"]){
+        [self dismissPopup];
+        return;
+    }
     if (self.gameState != GameStateWon && self.gameState != GameStateLost)
         [Flurry endTimedEvent:@"Played Level" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Level", [NSNumber numberWithInteger:self.controller.levelNumber], @"Stars", [NSNumber numberWithInteger:0], @"Exited", [NSNumber numberWithBool:YES], nil]];
     

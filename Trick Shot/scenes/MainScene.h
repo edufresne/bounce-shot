@@ -16,7 +16,6 @@ typedef enum : NSUInteger{
     GameStateLost, 
     GameStateWon,
     GameStateWaitingForTouch,
-    GameStateTiltControls,
 }GameState;
 typedef enum : NSUInteger{
     MenuStateHidden,

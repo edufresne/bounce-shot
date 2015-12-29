@@ -18,6 +18,9 @@
 @property (assign, nonatomic) NSUInteger localLevelCount;
 @property (assign, nonatomic) NSUInteger levelSkips;
 @property (strong, nonatomic) NSMutableDictionary *powerupMap;
+
+@property (assign, nonatomic) NSUInteger survivalHighScore;
+@property (assign, nonatomic) NSTimeInterval longestTime;
 +(IEDataManager*)sharedManager;
 -(void)completedLevel:(NSUInteger)level withStars:(NSUInteger)stars;
 -(void)skippedLevel;
@@ -25,5 +28,7 @@
 -(NSUInteger)starsForLevel:(NSUInteger)level;
 -(NSUInteger)starCount;
 +(NSString*)keyForPowerupType:(IEPowerupType)type;
+-(void)viewedPowerup:(IEPowerupType)type;
+-(void)scoredInSurvival:(NSUInteger)score time:(NSTimeInterval) time;
 
 @end

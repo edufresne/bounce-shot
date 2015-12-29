@@ -7,6 +7,12 @@
 //
 
 #import <SpriteKit/SpriteKit.h>
+struct IELineSegment{
+    CGPoint first;
+    CGPoint second;
+};
+typedef struct IELineSegment IELineSegment;
+IELineSegment IELineSegmentMake(CGPoint first, CGPoint second);
 
 @class IEPointPair;
 

@@ -104,6 +104,13 @@
     [self addChild: self.blackMask];
     self.popupAtlas = [SKTextureAtlas atlasNamed:@"dialogue.atlas"];
 }
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    if (self.popupVisible){
+        CGPoint point = [[touches anyObject] locationInNode:self];
+        if (!CGRectContainsPoint(self.popup.frame, point))
+            [self dismissPopup];
+    }
+}
 -(void)buttonWasPressed:(id)button{
     if ([button isKindOfClass:[IELabelButton class]]){
         IELabelButton *labelButton = (IELabelButton*)button;
@@ -128,14 +135,14 @@
             
             self.popup = [self createPopUpWithType:&powerupType];
             [self addChild:self.popup];
-            [self.popup runAction:[SKAction moveToY:self.size.height/2 duration:0.25]];
+            [self.popup runAction:[SKAction moveToY:self.size.height/2 duration:0.125]];
             [self.blackMask runAction:[SKAction fadeAlphaTo:0.5 duration:0.25]];
         }
     }
 }
 -(void)dismissPopup{
     [self.blackMask runAction:[SKAction fadeAlphaTo:0 duration:0.25]];
-    [self.popup runAction:[SKAction moveToY:-self.popup.size.height/2 duration:0.25]];
+    [self.popup runAction:[SKAction moveToY:-self.popup.size.height/2 duration:0.125]];
     self.popupVisible = NO;
 }
 #pragma mark Helper Method

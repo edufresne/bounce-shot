@@ -15,6 +15,7 @@
 @optional
 -(void)timerDidIncrement:(IETimeLabel*)timeLabel;
 -(void)timerDidDecrement:(IEDecrementTimeLabel*)timeLabel;
+-(void)timerDidFinishCountDown:(IEDecrementTimeLabel*)timeLabel;
 @end
 
 @interface IETimeLabel : SKLabelNode

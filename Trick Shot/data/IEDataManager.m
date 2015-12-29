@@ -32,6 +32,8 @@
                 if (key != nil)
                     [self.powerupMap setValue:[NSNumber numberWithBool:NO] forKey:key];
             }
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.powerupMap];
+            [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"powerupMap"];
             self.highestUnlock = 1;
             self.levelSkips = 1;
             self.highestUnlock = 1000;
@@ -41,6 +43,9 @@
             self.showTutorial = YES;
             [[NSUserDefaults standardUserDefaults] setBool:self.hasRanBefore forKey:@"hasRanBefore"];
             self.localLevelCount = 102;
+            self.survivalHighScore = [[NSUserDefaults standardUserDefaults] integerForKey:@"survivalHighScore"];
+            self.longestTime = [[NSUserDefaults standardUserDefaults] floatForKey:@"longestTime"];
+            
 
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 NSDate *date = [NSDate date];
@@ -58,6 +63,8 @@
             
             self.highestUnlock = [[NSUserDefaults standardUserDefaults] integerForKey:@"highestUnlock"];
             self.levelSkips = [[NSUserDefaults standardUserDefaults] integerForKey:@"levelSkips"];
+            NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:@"powerupMap"];
+            self.powerupMap = [NSKeyedUnarchiver unarchiveObjectWithData:data];
         }
         [[NSUserDefaults standardUserDefaults] synchronize];
         self.isLoaded = YES;
@@ -170,6 +177,12 @@
         return @"IEPowerupTiltKey";
     else
         return nil;
+}
+-(void)viewedPowerup:(IEPowerupType)type{
+    NSString *key = [IEDataManager keyForPowerupType:type];
+    [self.powerupMap setObject:[NSNumber numberWithBool:YES] forKey:key];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.powerupMap];
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"powerupMap"];
 }
 -(void)initializeController:(IEBounceLevelController*)controller{
     if (controller.levelNumber == 1){
@@ -2029,4 +2042,16 @@
     }
     [controller saveLocally];
 }
+-(void)scoredInSurvival:(NSUInteger)score time:(NSTimeInterval) time{
+    if (score>self.survivalHighScore){
+        self.survivalHighScore = score;
+        [[NSUserDefaults standardUserDefaults] setInteger:self.survivalHighScore forKey:@"survivalHighScore"];
+    }
+    if (time>self.longestTime){
+        self.longestTime = time;
+        [[NSUserDefaults standardUserDefaults] setFloat:time forKey:@"longestTime"];
+    }
+}
+
+
 @end

@@ -22,6 +22,8 @@
         self.seconds = 0;
         self.started = NO;
         self.text = @"00:00:00";
+        self.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
+        self.horizontalAlignmentMode = SKLabelHorizontalAlignmentModeCenter;
     }
     return self;
 }
@@ -128,6 +130,8 @@
     self.text = [self description];
     if (self.text.intValue < 0){
         [timer invalidate];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(timerDidFinishCountDown:)])
+            [self.delegate timerDidFinishCountDown:self];
         [self removeFromParent];
     }
 }

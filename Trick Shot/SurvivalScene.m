@@ -10,14 +10,22 @@
 #import "AppDelegate.h"
 #import "IEPowerup.h"
 #import "MenuScene.h"
+#import <GameKit/GameKit.h>
+#import <CoreMotion/CoreMotion.h>
+#import "IEDataManager.h"
 #define BALL_ARROW_SPACING 15.0
 #define noGravity ((self.physicsWorld.gravity.dx == 0) && (self.physicsWorld.gravity.dy == 0))
 #define FIRE_SPEED_MULTIPLIER 1.25
 #define GRAVITY_FIRE_MULTIPLIER 2.9
 #define INITIAL_SPEED 10.0
 #define DIM_FACTOR_POWERUP 12
+#define DIM_FACTOR_SMALL_STAR 20.0
 #define POWERUP_VANISH_TIME 8.0
 #define OBSTACLE_VANISH_TIME 12.0
+
+#define kFilteringFactor 0.1
+#define kVelocityMultiplier 600.0
+#define kMaxDistance sqrtf(powf(self.size.height, 2)+ powf(self.size.width, 2))
 
 @interface SurvivalScene ()
 {
@@ -26,6 +34,14 @@
     SKSpriteNode *menuList;
     CGFloat storedTheta;
     NSTimer *timeout;
+    CGVector pauseVelocity;
+    int currentPowerups;
+    IEDecrementTimeLabel *decrement;
+    NSInteger currentStars;
+    SKLabelNode *starLabel;
+    double accelX;
+    double accelY;
+    BOOL tilt;
 }
 @property (strong, nonatomic) SKSpriteNode *circle;
 @property (strong, nonatomic) SKTexture *dotTexture;
@@ -35,6 +51,8 @@
 @property (strong, nonatomic) NSMutableArray *currentObjects;
 @property (assign, nonatomic) BOOL powerupExists;
 @property (strong, nonatomic) SKShapeNode *dragShape;
+
+@property (strong, nonatomic) CMMotionManager *motionManager;
 @end
 @implementation SurvivalScene
 @synthesize circle;
@@ -43,8 +61,11 @@ static const uint32_t edgeCategory = 0x1 << 1;
 static const uint32_t powerupCategory = 0x1 << 2;
 static const uint32_t instaDeathCategory = 0x1 << 3;
 static const uint32_t invincibleCategory = 0x1 << 4;
+static const uint32_t starCategory = 0x1 << 5;
 
 -(void)didMoveToView:(SKView *)view{
+    currentPowerups = 0;
+    currentStars = 0;
     self.currentObjects = [[NSMutableArray alloc]init];
     self.gameState = GameStateStart;
     AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -59,6 +80,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     circleShape.strokeColor = [SKColor darkGrayColor];
     circleShape.fillColor = [SKColor whiteColor];
     circleShape.lineWidth = 20;
+    circleShape.antialiased = YES;
     circle = [SKSpriteNode spriteNodeWithTexture:[self.view textureFromNode:circleShape]];
     circle.size = CGSizeMake(32, 32);
     circle.position = CGPointMake(self.size.width/2, circle.size.height/2);
@@ -125,18 +147,37 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     [self addChild:menuButton];
     timeLabel = [IETimeLabel labelNodeWithFontNamed:@"Roboto-Thin"];
     timeLabel.delegate = self;
+    timeLabel.fontColor = [SKColor whiteColor];
     timeLabel.fontSize = 16;
     timeLabel.zPosition = 10;
     timeLabel.position = CGPointMake(self.size.width/2, menuButton.position.y);
-    timeLabel.fontColor =  [SKColor darkGrayColor];
     [self addChild:timeLabel];
     
     self.manager = [[IESimpleSelectionManager alloc] init];
     self.manager.delegate = self;
+    
+    starLabel = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
+    starLabel.fontColor = [SurvivalScene colorWithR:255 G:255 B:77];
+    starLabel.fontSize = timeLabel.fontSize;
+    starLabel.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
+    starLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentModeCenter;
+    starLabel.text = @"0";
+    SKSpriteNode *miniStar = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
+    miniStar.size = CGSizeMake(starLabel.frame.size.height, starLabel.frame.size.height);
+    miniStar.position = CGPointMake(starLabel.frame.size.width*2, 0);
+    miniStar.alpha = 0.5;
+    starLabel.position = CGPointMake(self.frame.size.width/4, timeLabel.position.y);
+    [starLabel addChild:miniStar];
+    [self addChild:starLabel];
+    
 }
 -(void)powerupDidEndWithType:(IEPowerupType)type{
     self.powerupExists = NO;
-    if (type == IEPowerupGravity){
+    if (type == IEPowerupGravity || type == IEPowerupTilt){
+        if (self.motionManager){
+            [self.motionManager stopAccelerometerUpdates];
+            self.motionManager = nil;
+        }
         NSMutableArray *array = [NSMutableArray array];
         [array addObjectsFromArray:self.manager.connections];
         for (IEPointPair *pair in array){
@@ -182,6 +223,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         [self.circle removeAllActions];
         self.circle.physicsBody.categoryBitMask = ballCategory;
         self.circle.colorBlendFactor = 0;
+        self.circle.alpha = 1;
     }
     else if (type == IEPowerupKey)
         self.physicsBody = nil;
@@ -195,6 +237,19 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                 [self.circle runAction:[SKAction sequence:@[[SKAction scaleTo:0 duration:0.25], [SKAction removeFromParent]]]];
                 [self handleEndingState];
             }
+        }
+        else if ( contact.bodyA.categoryBitMask == starCategory || contact.bodyB.categoryBitMask == starCategory){
+            SKNode *star;
+            if (contact.bodyA.categoryBitMask == starCategory)
+                star = contact.bodyA.node;
+            else
+                star = contact.bodyB.node;
+            [star removeAllActions];
+            star.physicsBody = nil;
+            [star runAction:[SKAction sequence:@[[SKAction group:@[[SKAction fadeAlphaTo:0 duration:0.25], [SKAction scaleBy:1.25 duration:0.25]]], [SKAction removeFromParent]]]];
+            currentStars++;
+            starLabel.text = [NSString stringWithFormat:@"%i", (int)currentStars];
+            [self generateStar];
         }
         else if (contact.bodyA.categoryBitMask == powerupCategory || contact.bodyB.categoryBitMask == powerupCategory){
             IEPowerup *powerup;
@@ -279,6 +334,30 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                     node.physicsBody.friction = 0.2;
                 }
             }
+            else if (type == IEPowerupTilt){
+                tilt = YES;
+                self.physicsBody.friction = 0.2;
+                self.physicsBody.restitution = 0.2;
+                self.circle.physicsBody.restitution = 0;
+                self.circle.physicsBody.friction = 0.2;
+                self.circle.physicsBody.linearDamping = 0.3;
+                self.motionManager = [[CMMotionManager alloc] init];
+                self.motionManager.accelerometerUpdateInterval = 1/60.0;
+                self.physicsWorld.gravity = CGVectorZero();
+                self.circle.physicsBody.velocity = CGVectorZero();
+                [self.motionManager startAccelerometerUpdatesToQueue:[[NSOperationQueue alloc] init] withHandler:^(CMAccelerometerData * _Nullable accelerometerData, NSError * _Nullable error) {
+                    if (error)
+                        NSLog(@"No Gyroscope");
+                    else{
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            CMAcceleration acceleration = accelerometerData.acceleration;
+                            accelX = (acceleration.x*kFilteringFactor)+(accelX*(1-kFilteringFactor));
+                            accelY = (acceleration.y*kFilteringFactor)+(accelY*(1-kFilteringFactor));
+                            circle.physicsBody.velocity = CGVectorMake(accelX*kVelocityMultiplier, (accelY+0.4)*kVelocityMultiplier);
+                        });
+                    }
+                }];
+            }
             else if (type == IEPowerupImmune){
                 self.circle.physicsBody.categoryBitMask = invincibleCategory;
                 self.circle.alpha = 0.7;
@@ -296,12 +375,19 @@ static const uint32_t invincibleCategory = 0x1 << 4;
                 [self powerupDidEndWithType:type];
             }]]]];
             if (powerup.powerupType != IEPowerupAimAndFire){
+                
                 IEPowerup *copy = [IEPowerup powerupWithType:powerup.powerupType shiftPoint:CGPointZero];
-                copy.size = CGSizeMake(0.8*self.size.width/DIM_FACTOR_POWERUP, 0.8*self.size.width/DIM_FACTOR_POWERUP);
-                copy.position = CGPointMake(self.size.width-copy.size.width/2-5, self.size.height-copy.size.height/2-5);
+                copy.size = CGSizeMake(self.size.width/DIM_FACTOR_POWERUP, self.size.width/DIM_FACTOR_POWERUP);
                 copy.alpha = 0.5;
-                [self addChild:copy];
-                [copy runAction:[SKAction sequence:@[[SKAction waitForDuration:5], [SKAction removeFromParent]]]];
+                IEDecrementTimeLabel *countDown = [IEDecrementTimeLabel timeLabelWithFontNamed:@"Roboto-Thin" seconds:5];
+                countDown.fontColor = [SKColor whiteColor];
+                countDown.fontSize = 16;
+                countDown.position = CGPointMake(self.size.width-5-copy.size.width/2, self.size.height-5-copy.size.height-countDown.frame.size.height);
+                copy.position = CGPointMake(0, copy.size.height/2+countDown.frame.size.height/2+5);
+                [self addChild:countDown];
+                [countDown start];
+                [countDown addChild:copy];
+                decrement = countDown;
             }
         }
         else if (contact.bodyA.categoryBitMask == edgeCategory || contact.bodyB.categoryBitMask == edgeCategory){
@@ -338,13 +424,25 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     SKNode *node = [self nodeAtPoint:location];
     if ([node.name isEqualToString:@"restart"] && self.gameState != GameStatePaused && self.gameState != GameStateLost && self.menuState == MenuStateHidden){
         [self showContentList];
-        //Pause
+        [self runAction:[SKAction sequence:@[[SKAction waitForDuration:0.3], [SKAction runBlock:^{
+            self.paused = YES;
+            pauseVelocity = circle.physicsBody.velocity;
+            circle.physicsBody.velocity = CGVectorZero();
+            [timeLabel stop];
+            if (decrement)
+                [decrement stop];
+        }]]]];
     }
     else if (self.gameState == GameStateStart)
         return;
     else if (self.menuState == MenuStateShowing && !CGRectContainsPoint(menuList.frame, location)){
         [self hideContentList];
-        //Unpause
+        self.paused = NO;
+        circle.physicsBody.velocity = pauseVelocity;
+        pauseVelocity = CGVectorZero();
+        [timeLabel start];
+        if (decrement)
+            [decrement start];
     }
     else if (self.gameState == GameStateWaitingForTouch && self.menuState != MenuStateShowing){
         CGFloat distance = sqrtf(powf(self.size.width/2, 2)+powf(self.size.height/2, 2));
@@ -360,7 +458,14 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         CGFloat distance = distanceFromPointToPoint(menu.position, location);
         if (distance<self.manager.minimumDrawDistance+menu.frame.size.width/2){
             [self showContentList];
-            // Pause
+            [self runAction:[SKAction sequence:@[[SKAction waitForDuration:0.3], [SKAction runBlock:^{
+                self.paused = YES;
+                pauseVelocity = circle.physicsBody.velocity;
+                circle.physicsBody.velocity = CGVectorZero();
+                [timeLabel stop];
+                if (decrement)
+                    [decrement stop];
+            }]]]];
         }
         else{
             [self.manager startedSelection:location];
@@ -412,6 +517,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         //Selection Sprite ?
         self.gameState = GameStatePlaying;
         [timeLabel start];
+        [self generateStar];
     }
 }
 -(void)showContentList{
@@ -474,6 +580,18 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     if (!delegate.adsRemoved)
         [[NSNotificationCenter defaultCenter] postNotificationName:@"showInterstitial" object:nil];
     
+    NSTimeInterval time = timeLabel.currentTimeInSeconds;
+    IEDataManager *manager = [IEDataManager sharedManager];
+    [manager scoredInSurvival:currentStars time:time];
+    GKScore *starScore = [[GKScore alloc] initWithLeaderboardIdentifier:@"BounceDraw.SurvivalMostStars"];
+    starScore.value = (int64_t)currentStars;
+    GKScore *timeScore = [[GKScore alloc] initWithLeaderboardIdentifier:@"BounceDraw.SurvivalLeaderboard"];
+    timeScore.value = (int64_t)time;
+    [GKScore reportScores:@[starScore, timeScore] withCompletionHandler:^(NSError * _Nullable error) {
+        if (error)
+            NSLog(@"Could not report scores in survival");
+    }];
+    
     SKSpriteNode *black = [SKSpriteNode spriteNodeWithColor:[SurvivalScene colorWithR:54 G:54 B:54] size:self.size];
     black.position = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
     black.alpha = 0;
@@ -487,6 +605,25 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     label.alpha = 0;
     [self addChild:label];
     [label runAction:[SKAction fadeAlphaTo:1 duration:0.25]];
+    SKSpriteNode *star = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
+    star.size = CGSizeMake(4*self.size.width/DIM_FACTOR_SMALL_STAR, 4*self.size.width/DIM_FACTOR_SMALL_STAR);
+    star.position = CGPointMake(self.size.width/2-star.size.width/2-5, self.size.height+star.size.height/2);
+    [self addChild:star];
+    [star runAction:[SKAction sequence:@[[SKAction waitForDuration:0.25], [SKAction moveToY:(self.size.height+label.position.y)/2 duration:0.25]]]];
+    SKLabelNode *counterNode = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
+    counterNode.fontColor = starLabel.fontColor;
+    counterNode.fontSize = 35;
+    counterNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentModeCenter;
+    counterNode.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
+    counterNode.text = @"0";
+    counterNode.position = CGPointMake(star.position.x+star.size.width/2+counterNode.frame.size.width*3, (self.size.height+label.position.y)/2);
+    counterNode.alpha = 0;
+    [self addChild:counterNode];
+    [counterNode runAction:[SKAction sequence:@[[SKAction waitForDuration:0.5], [SKAction fadeAlphaTo:1 duration:0], [SKAction repeatAction:[SKAction sequence:@[[SKAction waitForDuration:0.05], [SKAction runBlock:^{
+        int value = counterNode.text.intValue;
+        value++;
+        counterNode.text = [NSString stringWithFormat:@"%i", value];
+    }]]] count:currentStars]]]];
     
     IELabelButton *nextLevel;
     nextLevel = [IELabelButton buttonWithFontName:@"Roboto-Thin" defaultColor:[SKColor whiteColor] selectedColor:[SKColor lightGrayColor]];
@@ -591,21 +728,19 @@ static const uint32_t invincibleCategory = 0x1 << 4;
 #pragma mark - Generation Algorithms
 -(void)timerDidIncrement:(IETimeLabel *)time{
     NSTimeInterval currentTime = (NSTimeInterval)[time currentTimeInSeconds];
-    static int currentPowerups = 0;
     CGFloat probability;
     if (currentPowerups == 0)
-        probability = 0.05+currentTime/100;
+        probability = 0.05+currentTime/200.0;
     else if (currentPowerups == 1)
-        probability = 0.025+currentTime/200;
+        probability = 0.025+currentTime/500.0;
     else if (currentPowerups == 2)
-        probability = 0.01+currentTime/5005;
+        probability = 0.01+currentTime/1000.0;
     else
         probability = -1;
 
-    
     CGFloat rand = randomNumberBetween(1, 0);
     if (rand<probability){
-        if (randomNumberBetween(1, 0)<0.25 && !self.powerupExists){
+        if (randomNumberBetween(1, 0)<0.5 && !self.powerupExists){
             [self generatePowerup];
             return;
         }
@@ -617,10 +752,6 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         BOOL instaDeath = arc4random()%2;
         CGFloat scale = randomNumberBetween(2, 1);
         CGPoint position;
-        do{
-            position = CGPointMake(randomNumberBetween(self.size.width-circle.size.width/2, circle.size.width/2), randomNumberBetween(self.size.height-circle.size.height/2, circle.size.height));
-        }
-        while(distanceFromPointToPoint(circle.position, position)<200 && ![self nodeAtPoint: position]);
         
         CGFloat rotation = randomNumberBetween(2*M_PI, 0);
         int type = arc4random()%3;
@@ -628,9 +759,58 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         sprite.zRotation = rotation;
         sprite.xScale = scale;
         sprite.yScale = scale;
-        sprite.position = position;
+        NSDate *date = [NSDate date];
+        bool end = false;
+        do{
+            sprite.position = CGPointMake(randomNumberBetween(self.size.width-circle.size.width/2, circle.size.width/2), randomNumberBetween(self.size.height-circle.size.height/2, circle.size.height));
+            
+            CGVector velocity = circle.physicsBody.velocity;
+            CGFloat resultant = resultantVelocity(velocity);
+            if (resultant == 0)
+                return;
+            CGFloat theta;
+            if (velocity.dy>=0 && velocity.dx>= 0)
+                theta = asin(velocity.dy/resultant);
+            else if (velocity.dx<0 && velocity.dy >= 0)
+                theta = M_PI - asin(velocity.dy/resultant);
+            else if (velocity.dx<0 && velocity.dy < 0)
+                theta = M_PI+atan(velocity.dy/velocity.dx);
+            else
+                theta = M_PI*2-acos(velocity.dx/resultant);
+            
+            CGFloat alpha = M_PI_2+theta;
+            CGFloat beta = M_PI+alpha;
+            CGFloat r = circle.size.width/2;
+            CGFloat ax = r*cosf(alpha);
+            CGFloat ay = r*sinf(alpha);
+            CGFloat bx = r*cosf(beta);
+            CGFloat by = r*sinf(beta);
+            
+            CGPoint point1 = CGPointMake(circle.position.x-ax, circle.position.y-ay);
+            CGPoint point2 = CGPointMake(point1.x+kMaxDistance*cosf(theta), point1.y+kMaxDistance*sinf(theta));
+            IELineSegment s = IELineSegmentMake(point1, point2);
+            
+            CGRect rect = sprite.frame;
+            if (IELineSegmentIntersectsRect(s, rect))
+                continue;
+            
+            point1 = CGPointMake(circle.position.x-bx, circle.position.y-by);
+            point2 = CGPointMake(point1.x+kMaxDistance*cosf(theta), point1.y+kMaxDistance*sinf(theta));
+            s = IELineSegmentMake(point1, point2);
+            
+            if (IELineSegmentIntersectsRect(s, rect))
+                continue;
+            end = true;
+        }
+        while(distanceFromPointToPoint(circle.position, position)<200+sprite.frame.size.width/2 && ![self nodeAtPoint: position] && end);
+        NSLog(@"Generated obstacle in : %f seconds", -date.timeIntervalSinceNow);
+        
         [self addChild:sprite];
-        [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:OBSTACLE_VANISH_TIME], [SKAction repeatAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0], [SKAction waitForDuration:0.25], [SKAction fadeAlphaTo:1 duration:0], [SKAction waitForDuration:0.25]]] count:8], [SKAction removeFromParent]]]];
+        [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:OBSTACLE_VANISH_TIME], [SKAction runBlock:^{
+            if ([sprite actionForKey:@"pulsing"]){
+                [sprite removeActionForKey:@"pulsing"];
+            }
+        }],[SKAction repeatAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:0], [SKAction waitForDuration:0.25], [SKAction fadeAlphaTo:1 duration:0], [SKAction waitForDuration:0.25]]] count:8], [SKAction removeFromParent]]]];
     }
 }
 -(SKSpriteNode*)obstacleFromType:(ObstacleShape)shape instaDeath:(BOOL)instaDeath{
@@ -667,7 +847,7 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     else
         return nil;
     if (instaDeath){
-        [spriteNode runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction fadeAlphaTo:1 duration:1], [SKAction waitForDuration:0.5], [SKAction fadeAlphaTo:0.5 duration:1], [SKAction waitForDuration:0.5]]]]];
+        [spriteNode runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction fadeAlphaTo:1 duration:1], [SKAction waitForDuration:0.5], [SKAction fadeAlphaTo:0.5 duration:1], [SKAction waitForDuration:0.5]]]] withKey:@"pulsing"];
         spriteNode.physicsBody.categoryBitMask = instaDeathCategory;
         spriteNode.physicsBody.collisionBitMask = 0x0;
         spriteNode.physicsBody.contactTestBitMask = ballCategory;
@@ -685,17 +865,33 @@ static const uint32_t invincibleCategory = 0x1 << 4;
     }
     return spriteNode;
 }
-
+-(void)generateStar{
+    SKSpriteNode *star = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
+    star.size = CGSizeMake(self.size.width/DIM_FACTOR_SMALL_STAR, self.size.width/DIM_FACTOR_SMALL_STAR);
+    star.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:star.size];
+    star.physicsBody.categoryBitMask = starCategory;
+    star.physicsBody.collisionBitMask = 0x0;
+    star.physicsBody.contactTestBitMask = ballCategory | invincibleCategory;
+    star.physicsBody.affectedByGravity = NO;
+    do{
+        star.position = CGPointMake(randomNumberBetween(self.size.width-star.size.width-10, star.size.width), randomNumberBetween(self.size.height-star.size.height-20, star.size.height));
+    }
+    while (distanceFromPointToPoint(star.position, [self childNodeWithName:@"restart"].position)<100);
+    [star runAction:[SKAction repeatActionForever:[SKAction sequence:@[[SKAction scaleTo:1.25 duration:1], [SKAction scaleTo:1.0 duration:1]]]]];
+    [self addChild:star];
+}
 -(void)generatePowerup{
     self.powerupExists = YES;
     IEPowerup *powerup;
-    int rand = arc4random()%4;
+    int rand = arc4random()%5;
     if (rand == 0)
         powerup = [IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointZero];
     else if (rand == 1)
         powerup = [IEPowerup powerupWithType:IEPowerupGravity shiftPoint:CGPointZero];
     else if (rand == 2)
         powerup = [IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointZero];
+    else if (rand == 3)
+        powerup = [IEPowerup powerupWithType:IEPowerupTilt shiftPoint:CGPointZero];
     else
         powerup = [IEPowerup powerupWithType:IEPowerupImmune shiftPoint:CGPointZero];
     powerup.size = CGSizeMake(self.size.width/DIM_FACTOR_POWERUP, self.size.width/DIM_FACTOR_POWERUP);
@@ -723,7 +919,6 @@ static const uint32_t invincibleCategory = 0x1 << 4;
         if (powerup.parent!=nil)
             [powerup removeFromParent];
         self.powerupExists = NO;
-        //Needs Testing
     }]]]];
     [self addChild:powerup];
 }
@@ -776,6 +971,96 @@ static inline CGVector CGVectorZero(){
 static inline CGFloat randomNumberBetween(CGFloat high, CGFloat low){
     CGFloat random = (CGFloat)rand()/(CGFloat)RAND_MAX;
     return low+random*(high-low);
+}
+-(void)timerDidFinishCountDown:(IEDecrementTimeLabel *)timeLabel{
+    decrement = nil;
+}
+static inline bool IELineSegmentIntersectsRect(IELineSegment segment, CGRect rect){
+    if (CGRectContainsPoint(rect, segment.first)|| CGRectContainsPoint(rect, segment.second))
+        return true;
+    IELineSegment bottom = IELineSegmentMake(CGPointMake(rect.origin.x, rect.origin.y), CGPointMake(rect.origin.x+rect.size.width, rect.origin.y));
+    IELineSegment left = IELineSegmentMake(bottom.first, CGPointMake(rect.origin.x, rect.origin.y+rect.size.height));
+    IELineSegment right = IELineSegmentMake(bottom.second, CGPointMake(rect.origin.x+rect.size.width, rect.origin.y+rect.size.height));
+    IELineSegment top = IELineSegmentMake(left.second, right.second);
+    
+    if (IELineSegmentsIntersect(segment, bottom)){
+        NSLog(@"Intersects bottom");
+        return true;
+    }
+    if (IELineSegmentsIntersect(segment, top)){
+        NSLog(@"Intersects top");
+        return true;
+    }
+    if (IELineSegmentsIntersect(segment, left)){
+        NSLog(@"Intersects left");
+        return true;
+    }
+    if (IELineSegmentsIntersect(segment, right)){
+        NSLog(@"Intersects right");
+        return true;
+    }
+    
+    return false;
+}
+static inline bool IELineSegmentsIntersect(IELineSegment a, IELineSegment b){
+    CGFloat px = det(det(a.first.x, a.first.y, a.second.x, a.second.y), det(a.first.x, 1, a.second.x, 1), det(b.first.x, b.first.y, b.second.x, b.second.y), det(b.first.x, 1, b.second.x, 1));
+    CGFloat py = det(det(a.first.x, a.first.y, a.second.x, a.second.y), det(a.first.y, 1, a.second.y, 1), det(b.first.x, b.first.y, b.second.x, b.second.y), det(b.first.y, 1, b.second.y, 1));
+    CGFloat den = det(det(a.first.x, 1, a.second.x, 1), det(a.first.y, 1, a.second.y, 1), det(b.first.x, 1, b.second.x, 1), det(b.first.y, 1, b.second.y, 1));
+    px/= den;
+    py/= den;
+    CGFloat larger;
+    CGFloat smaller;
+    if (a.first.x>a.second.x){
+        larger = a.first.x;
+        smaller = a.second.x;
+    }
+    else{
+        larger = a.second.x;
+        smaller = a.first.x;
+    }
+    if (px< smaller || px > larger)
+        return false;
+    
+    if (a.first.y>a.second.y){
+        larger = a.first.y;
+        smaller = a.second.y;
+    }
+    else{
+        larger = a.second.y;
+        smaller = a.first.y;
+    }
+    if (py< smaller || py > larger)
+        return false;
+    
+    if (b.first.x>b.second.x){
+        larger = b.first.x;
+        smaller = b.second.x;
+    }
+    else{
+        larger = b.second.x;
+        smaller = b.first.x;
+    }
+    if (px< smaller || px > larger)
+        return false;
+    
+    if (b.first.y>b.second.y){
+        larger = b.first.y;
+        smaller = b.second.y;
+    }
+    else{
+        larger = b.second.y;
+        smaller = b.first.y;
+    }
+    if (py<smaller || py > larger)
+        return false;
+    
+    return true;
+}
+static inline CGFloat det(CGFloat a1, CGFloat a2, CGFloat b1, CGFloat b2){
+    return a1*b2-a2*b1;
+}
+static inline CGFloat resultantVelocity(CGVector vector){
+    return sqrtf(powf(vector.dx, 2)+powf(vector.dy, 2));
 }
 
 @end

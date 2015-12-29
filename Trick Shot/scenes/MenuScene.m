@@ -220,8 +220,7 @@ static const uint32_t contactCategory = 0x1 << 0;
         [vc attemptAuthenticateForLeaderboard];
     }
     else if ([released.name isEqualToString:@"rate"]){
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"itms-app://itunes.com/app/id955896287"]];
-#warning - Replace ID for rate link with 1059196616
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://itunes.apple.com/app/id1059196616"]];
     }
     else if ([released.name isEqualToString:@"removeAds"]){
         UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Remove Ads" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
