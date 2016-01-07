@@ -53,6 +53,7 @@
 		07FD7B6E1C26C6AA00D64CE3 /* SurvivalScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FD7B6D1C26C6AA00D64CE3 /* SurvivalScene.m */; };
 		07FD7B711C26CC8500D64CE3 /* IETimeLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FD7B701C26CC8500D64CE3 /* IETimeLabel.m */; };
 		40B5BA5325C14911351611B3 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 45F67282608FB510DA543BFA /* libPods.a */; };
+		A6F337B81C384EEF0008171C /* twitter.png in Resources */ = {isa = PBXBuildFile; fileRef = A6F337B71C384EEF0008171C /* twitter.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -123,6 +124,7 @@
 		45F67282608FB510DA543BFA /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		A6F337B71C384EEF0008171C /* twitter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = twitter.png; path = resources/twitter.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +240,7 @@
 		07B1F7591BF800E400DEE6A7 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				A6F337B71C384EEF0008171C /* twitter.png */,
 				07C6A8FF1C2516860020B894 /* dialogue.atlas */,
 				07EBD2971BFCA6570016DE31 /* exit_button.png */,
 				078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */,
@@ -371,6 +374,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A6F337B81C384EEF0008171C /* twitter.png in Resources */,
 				07B1F7671BF8010100DEE6A7 /* tutscreen3.jpg in Resources */,
 				07B1F72A1BF7FEC400DEE6A7 /* LaunchScreen.storyboard in Resources */,
 				07B1F7681BF8010100DEE6A7 /* tutscreen4.jpg in Resources */,

@@ -1698,7 +1698,7 @@
         controller.levelName = @"Volleyball";
         controller.ballLocation = IEObjectLayoutBottom;
         controller.holeLayout = IEObjectLayoutBottomLeft;
-        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.5,0.48),(0.5,0.52),(1,0.52),(1,0.48)" texture:IETextureTypeInstaDeath], [IECustomPath fullScreenPathWithTexture:IETextureTypeNoClick], [IECustomPath pathWithPointsFromString:@"(1,0),(0.9,0),(1,0.2" texture:IETextureTypeSolid]]];
+        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.5,0.48),(0.5,0.52),(1,0.52),(1,0.48)" texture:IETextureTypeInstaDeath], [IECustomPath pathWithPointsFromString:@"(1,0),(0.9,0),(1,0.2" texture:IETextureTypeSolid]]];
         IEPowerup *powerup = [IEPowerup powerupWithType:IEPowerupGravity shiftPoint:CGPointMake(0.5, 0.05)];
         powerup.zRotation = M_PI_2;
         [controller addPowerup:powerup];
@@ -1929,7 +1929,16 @@
             [controller addPair:pair];
         }
         for (int k = 0;k<4;k++){
-            
+            IEPowerup *powerup = [IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointZero];
+            if (k == 0)
+                powerup.shiftPoint = CGPointMake(0.05, 0.05);
+            else if (k == 1)
+                powerup.shiftPoint = CGPointMake(0.05, 0.95);
+            else if (k == 2)
+                powerup.shiftPoint = CGPointMake(0.95, 0.95);
+            else
+                powerup.shiftPoint = CGPointMake(0.95, 0.05);
+            [controller addPowerup:powerup];
         }
         for (int k = 0;k<2;k++){
             IEPowerup *powerup = [IEPowerup powerupWithType:IEPowerupGhost shiftPoint:CGPointZero];

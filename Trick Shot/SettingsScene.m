@@ -14,6 +14,7 @@
 #import "IETimeLabel.h"
 #define ICON_DIM_FACTOR 6.5
 #define EXIT_BTN_DIM 8.5
+#define TWITTER_BTN_DIM 8.0
 
 @interface SettingsScene ()
 @property BOOL contentCreated;
@@ -138,8 +139,10 @@
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
     if (self.popupVisible){
         CGPoint point = [[touches anyObject] locationInNode:self];
-        if (!CGRectContainsPoint(self.popup.frame, point))
+        if (!CGRectContainsPoint(self.popup.frame, point)){
+            NSLog(@"dismiss from touch began");
             [self dismissPopup];
+        }
     }
 }
 -(void)buttonWasPressed:(id)button{
@@ -150,14 +153,21 @@
             [controller showTutorial];
         }
         else if ([labelButton.name isEqualToString:@"aboutUs"]){
-            SKSpriteNode *spriteNode = [self createPopUpWithType:NULL];
+            self.popupVisible = YES;
+            self.popup = [self createPopUpWithType:NULL];
+            [self addChild:self.popup];
+            [self.popup runAction:[SKAction moveToY:self.size.height/2 duration:0.125]];
+            [self.blackMask runAction:[SKAction fadeAlphaTo:0.5 duration:0.25]];
         }
     }
     else if ([button isKindOfClass: [IETextureButton class]]){
         IETextureButton *textureButton = (IETextureButton*)button;
-        if ([textureButton.name isEqualToString:@"exitButton"]||[textureButton.parent isEqual:self.popup]){
+        if ([textureButton.name isEqualToString:@"exitButton"]||([textureButton.parent isEqual:self.popup] && ![textureButton.name isEqualToString:@"twitterButton"])){
             [self dismissPopup];
             return;
+        }
+        else if ([textureButton.name isEqualToString:@"twitterButton"]){
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://twitter.com/IndieEndGames"]];
         }
         else if (!self.popupVisible){
             self.popupVisible = YES;
@@ -179,8 +189,34 @@
 #pragma mark Helper Method
 -(SKSpriteNode*)createPopUpWithType:(IEPowerupType*)type{
     if (type == NULL){
-        NSLog(@"About us");
-        return nil;
+        SKTexture *texture = [self.popupAtlas textureNamed:@"dialogue_about"];
+        SKSpriteNode *spriteNode = [SKSpriteNode spriteNodeWithTexture:texture];
+        spriteNode.size = CGSizeMake(self.size.width*3/4, self.size.width/2);
+        spriteNode.position = CGPointMake(self.size.width/2, -spriteNode.size.height/2);
+        SKTexture *exitTexture = [SKTexture textureWithImageNamed:@"exit_button"];
+        IETextureButton *exitButton = [IETextureButton buttonWithDefaultTexture:exitTexture selectedTexture:exitTexture];
+        exitButton.delegate = self;
+        exitButton.size = CGSizeMake(spriteNode.size.height/EXIT_BTN_DIM, spriteNode.size.height/EXIT_BTN_DIM);
+        exitButton.name = @"exitButton";
+        exitButton.position = CGPointMake(-spriteNode.size.width/2+exitButton.size.width/2, spriteNode.size.height/2-exitButton.size.height/2);
+        [spriteNode addChild:exitButton];
+        SKTexture *twitterTexture = [SKTexture textureWithImageNamed:@"twitter.png"];
+        IETextureButton *twitter = [IETextureButton buttonWithDefaultTexture:twitterTexture selectedTexture:twitterTexture];
+        twitter.delegate = self;
+        twitter.name = @"twitterButton";
+        twitter.size = CGSizeMake(self.size.width/TWITTER_BTN_DIM, self.size.width/TWITTER_BTN_DIM);
+        twitter.position = CGPointMake(0, -spriteNode.size.height/4);
+        [spriteNode addChild:twitter];
+        
+        SKLabelNode *label = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
+        label.fontSize = 13;
+        label.fontColor = [SKColor blackColor];
+        label.text = @"Follow us on Twitter!";
+        label.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
+        label.horizontalAlignmentMode = SKLabelHorizontalAlignmentModeCenter;
+        label.position = CGPointMake(0, twitter.position.y-twitter.size.height/2-label.frame.size.height/2-5);
+        [spriteNode addChild:label];
+        return spriteNode;
     }
     else{
         SKTexture *texture;

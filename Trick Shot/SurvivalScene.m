@@ -15,17 +15,23 @@
 #import "IEDataManager.h"
 #define BALL_ARROW_SPACING 15.0
 #define noGravity ((self.physicsWorld.gravity.dx == 0) && (self.physicsWorld.gravity.dy == 0))
-#define FIRE_SPEED_MULTIPLIER 1.25
+#define FIRE_SPEED_MULTIPLIER 1.0
 #define GRAVITY_FIRE_MULTIPLIER 2.9
-#define INITIAL_SPEED 10.0
+#define is_ipad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define INITIAL_SPEED 10.0*(((int)is_ipad)+1)
+
 #define DIM_FACTOR_POWERUP 12
 #define DIM_FACTOR_SMALL_STAR 20.0
+#define DIM_FACTOR_BALL 10.0
+#define DIM_FACTOR_OBSTACLE 6.4
+
 #define POWERUP_VANISH_TIME 8.0
 #define OBSTACLE_VANISH_TIME 12.0
 
 #define kFilteringFactor 0.1
 #define kVelocityMultiplier 600.0
 #define kMaxDistance sqrtf(powf(self.size.height, 2)+ powf(self.size.width, 2))
+#define detailedDebug
 
 @interface SurvivalScene ()
 {
@@ -79,10 +85,13 @@ static const uint32_t starCategory = 0x1 << 5;
     SKShapeNode *circleShape = [SKShapeNode shapeNodeWithCircleOfRadius:256];
     circleShape.strokeColor = [SKColor darkGrayColor];
     circleShape.fillColor = [SKColor whiteColor];
-    circleShape.lineWidth = 20;
+    if (is_ipad)
+        circleShape.lineWidth = 10;
+    else
+        circleShape.lineWidth = 20;
     circleShape.antialiased = YES;
     circle = [SKSpriteNode spriteNodeWithTexture:[self.view textureFromNode:circleShape]];
-    circle.size = CGSizeMake(32, 32);
+    circle.size = CGSizeMake(self.size.width/DIM_FACTOR_BALL, self.size.width/DIM_FACTOR_BALL);
     circle.position = CGPointMake(self.size.width/2, circle.size.height/2);
     circle.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:circle.size.width/2];
     circle.physicsBody.linearDamping = 0;
@@ -97,6 +106,7 @@ static const uint32_t starCategory = 0x1 << 5;
     circle.physicsBody.mass = 0.035744;
     [self addChild:circle];
     //arrow
+    NSLog(@"%f", self.size.width/50);
     SKSpriteNode *arrow = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"arrow_light.png"]];
     arrow.size = CGSizeMake(13, 11);
     arrow.alpha = 0.4;
@@ -738,7 +748,6 @@ static const uint32_t starCategory = 0x1 << 5;
         probability = 0.01+currentTime/1000.0;
     else
         probability = -1;
-
     CGFloat rand = randomNumberBetween(1, 0);
     if (rand<probability){
         if (randomNumberBetween(1, 0)<0.5 && !self.powerupExists){
@@ -752,7 +761,6 @@ static const uint32_t starCategory = 0x1 << 5;
         //Generate random obstacle
         BOOL instaDeath = arc4random()%2;
         CGFloat scale = randomNumberBetween(2, 1);
-        CGPoint position;
         
         CGFloat rotation = randomNumberBetween(2*M_PI, 0);
         int type = arc4random()%3;
@@ -767,8 +775,10 @@ static const uint32_t starCategory = 0x1 << 5;
             
             CGVector velocity = circle.physicsBody.velocity;
             CGFloat resultant = resultantVelocity(velocity);
-            if (resultant == 0)
-                return;
+            if (resultant == 0){
+                end = true;
+                continue;
+            }
             CGFloat theta;
             if (velocity.dy>=0 && velocity.dx>= 0)
                 theta = asin(velocity.dy/resultant);
@@ -803,7 +813,7 @@ static const uint32_t starCategory = 0x1 << 5;
                 continue;
             end = true;
         }
-        while(distanceFromPointToPoint(circle.position, position)<200+sprite.frame.size.width/2 && ![self nodeAtPoint: position] && end);
+        while(!end);
         NSLog(@"Generated obstacle in : %f seconds", -date.timeIntervalSinceNow);
         
         [self addChild:sprite];
@@ -822,7 +832,7 @@ static const uint32_t starCategory = 0x1 << 5;
         color = [SKColor whiteColor];
     SKSpriteNode *spriteNode;
     if (shape == ObstacleShapeSquare){
-        spriteNode = [SKSpriteNode spriteNodeWithColor:color size:CGSizeMake(50, 50)];
+        spriteNode = [SKSpriteNode spriteNodeWithColor:color size:CGSizeMake(self.size.width/DIM_FACTOR_OBSTACLE, self.size.width/DIM_FACTOR_OBSTACLE)];
         spriteNode.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:spriteNode.size];
     }
     else if (shape == ObstacleShapeCircle){
@@ -830,7 +840,7 @@ static const uint32_t starCategory = 0x1 << 5;
         shapeNode.fillColor = color;
         shapeNode.strokeColor = color;
         spriteNode = [SKSpriteNode spriteNodeWithTexture:[self.view textureFromNode:shapeNode]];
-        spriteNode.size = CGSizeMake(50, 50);
+        spriteNode.size = CGSizeMake(self.size.width/DIM_FACTOR_OBSTACLE, self.size.width/DIM_FACTOR_OBSTACLE);
         spriteNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:spriteNode.size.width/2];
     }
     else if (shape == ObstacleShapeTriangle){
@@ -844,6 +854,7 @@ static const uint32_t starCategory = 0x1 << 5;
         shapeNode.fillColor = color;
         spriteNode = [SKSpriteNode spriteNodeWithTexture:[self.view textureFromNode:shapeNode]];
         spriteNode.physicsBody = [SKPhysicsBody bodyWithPolygonFromPath:path.CGPath];
+        spriteNode.size = CGSizeMake(self.size.width/DIM_FACTOR_OBSTACLE, self.size.width/DIM_FACTOR_OBSTACLE);
     }
     else
         return nil;

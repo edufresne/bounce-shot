@@ -426,6 +426,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             IEPowerupType type = powerup.powerupType;
             if (type == IEPowerupAimAndFire){
                 tilt = NO;
+                if (self.motionManager){
+                    [self.motionManager stopAccelerometerUpdates];
+                    self.motionManager = nil;
+                }
                 CGVector storedVelocity = self.circle.physicsBody.velocity;
                 self.circle.physicsBody.velocity = CGVectorMake(0, 0);
                 self.circle.physicsBody.affectedByGravity = NO;
@@ -485,6 +489,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                     [self.motionManager stopAccelerometerUpdates];
                     self.motionManager = nil;
                 }
+                
                 self.physicsBody.friction = 0.2;
                 self.physicsBody.restitution = 0.2;
                 //Changed restitution of cirlcle from 0 to 0.2. 
@@ -558,10 +563,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                     obstacle.physicsBody.restitution = 0.2;
                     obstacle.physicsBody.friction = 0.2;
                 }
-                for (IEPointPair *pair in self.manager.connections){
-                    SKNode *node = pair.dot1;
-                    node.physicsBody.restitution = 0.2;
-                    node.physicsBody.friction = 0.2;
+                NSMutableArray *array = [NSMutableArray arrayWithArray:self.manager.connections];
+                for (IEPointPair *pair in array){
+                    [self.manager removePair:pair];
                 }
                 self.currentHitLabel.text = @"Hits Left: --";
                 self.motionManager = [[CMMotionManager alloc] init];
