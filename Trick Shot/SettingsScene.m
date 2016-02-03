@@ -38,7 +38,7 @@
     self.backgroundColor = [delegate.arrayOfColors objectAtIndex:index];
     UIColor *baseColor;
     UIColor *selectedColor;
-    if (index <=4){
+    if (index <=4 || index == 7){
         baseColor = [SKColor darkGrayColor];
         selectedColor = [SKColor lightGrayColor];
     }
@@ -48,6 +48,7 @@
     }
     IEDataManager *manager = [IEDataManager sharedManager];
     SKLabelNode *normal = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
+    normal.fontColor = baseColor;
     normal.fontSize = 18;
     normal.position = CGPointMake(self.size.width/2, self.size.height*15/16);
     normal.text = [NSString stringWithFormat:@"Stars Collected: %i/%i", (int)manager.starCount, (int)manager.localLevelCount*3];

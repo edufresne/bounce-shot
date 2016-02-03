@@ -17,10 +17,9 @@
 }
 -(void)viewDidLoad{
     [super viewDidLoad];
-    AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    self.view.backgroundColor = [delegate.arrayOfColors objectAtIndex:0];
+    self.view.backgroundColor = [UIColor colorWithRed:0.863 green:0.910 blue:0.922 alpha:1.00];
     NSMutableArray *array = [NSMutableArray array];
-    for (int k = 0;k<6;k++){
+    for (int k = 1;k<=6;k++){
         [array addObject:[NSString stringWithFormat:@"tutscreen%i.jpg", k]];
     }
     self.imageNames = [NSArray arrayWithArray:array];
@@ -34,19 +33,25 @@
     [self.pageController setViewControllers:vcs direction:UIPageViewControllerNavigationDirectionForward animated:YES completion:nil];
     
     //Adds room for UIPageControl and title at top
-    self.pageController.view.frame = CGRectMake(0, 30, self.view.frame.size.width, self.view.frame.size.height-60);
+    self.pageController.view.frame = CGRectMake(7.5, 30, self.view.frame.size.width-15, self.view.frame.size.height-30);
     
     //Settings pages parent view controller, parent view and calling didMove method
     [self addChildViewController:self.pageController];
     [self.view addSubview:self.pageController.view];
     [self.pageController didMoveToParentViewController:self];
 }
+-(void)viewWillLayoutSubviews{
+    [super viewWillLayoutSubviews];
+    
+}
 - (IBAction)pressedSkip:(id)sender {
     IEDataManager *manager = [IEDataManager sharedManager];
     manager.showTutorial = NO;
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"showTutorial"];
+    NSLog(@"%i", manager.showTutorial);
     [self.pageController.view removeFromSuperview];
     [self.pageController removeFromParentViewController];
-    [self dismissViewControllerAnimated:NO completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 #pragma mark - UIPageViewController Data Source
 -(UIViewController*)pageViewController:(UIPageViewController *)pageViewController viewControllerAfterViewController:(UIViewController *)viewController{

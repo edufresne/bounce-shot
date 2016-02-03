@@ -24,6 +24,7 @@
 -(id)init{
     if (self = [super init]){
         self.hasRanBefore = [[NSUserDefaults standardUserDefaults] boolForKey:@"hasRanBefore"];
+
         if (!self.hasRanBefore){
             self.powerupMap = [NSMutableDictionary dictionary];
             for (int k = 0;k<10;k++){
@@ -39,6 +40,7 @@
             [[NSUserDefaults standardUserDefaults] setInteger:self.highestUnlock forKey:@"highestUnlock"];
             self.hasRanBefore = YES;
             self.showTutorial = YES;
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"showTutorial"];
             [[NSUserDefaults standardUserDefaults] setBool:self.hasRanBefore forKey:@"hasRanBefore"];
             self.localLevelCount = 102;
             self.survivalHighScore = [[NSUserDefaults standardUserDefaults] integerForKey:@"survivalHighScore"];
@@ -56,7 +58,8 @@
             });
         }
         else{
-            self.showTutorial = NO;
+            self.showTutorial = [[NSUserDefaults standardUserDefaults] boolForKey:@"showTutorial"];
+            NSLog(@"%i", self.showTutorial);
             self.localLevelCount = [IEBounceLevelController controllerCount];
             
             self.highestUnlock = [[NSUserDefaults standardUserDefaults] integerForKey:@"highestUnlock"];
@@ -285,7 +288,6 @@
     else if (controller.levelNumber == 10){
         //Dead zone covering majority of middle
         controller.levelName = @"Canyon";
-        controller.ballAngle = M_PI;
         controller.ballLocation = IEObjectLayoutBottomLeft;
         controller.holeLayout = IEObjectLayoutTopRight;
         IEObjectPointPair *pair = [IEObjectPointPair pairWithShift:CGPointMake(0.5, 0.5) shapeName:IEShapeNameRectangleLongest textureName:IETextureTypeNoClick];
@@ -748,7 +750,7 @@
         AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
         [delegate storeShiftPoint:CGPointMake(0.5,0.4) forIntegerKey:controller.levelNumber ball:NO];
         [delegate storeShiftPoint:CGPointMake(0.18, 0.9) forIntegerKey:controller.levelNumber ball:YES];
-        controller.starQuantitys = IEStarQuantityCreate(6, 5, 4);
+        controller.starQuantitys = IEStarQuantityCreate(10, 7, 5);
     }
     else if (controller.levelNumber == 37){
         controller.levelName = @"Rainbow";
@@ -1497,40 +1499,26 @@
     }
     else if (controller.levelNumber == 78){
         controller.levelName = @"Deadly Borders";
-        controller.ballLocation = IEObjectLayoutCustom;
-        controller.holeLayout = IEObjectLayoutDiagonalTopRight;
-        AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-        [delegate storeShiftPoint:CGPointMake(0.25, 0.15) forIntegerKey:controller.levelNumber ball:YES];
-        
-        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0,0.55),(0,1),(0.47,1),(0.06,0.9)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(1,0.55),(1,1),(0.53,1),(0.94,0.9)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(1,0.45),(1,0),(0.53,0),(0.94,0.1)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.47,0.5),(0.5,0.6),(0.53,0.5),(0.5,0.4)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0,0.45),(0,0),(0.47,0),(0.06,0.1)" texture:IETextureTypeSolid]]];
-        for (int k = 0;k<4;k++){
+        controller.ballAngle = M_PI*3/2;
+        controller.ballLocation = IEObjectLayoutMiddle;
+        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0,0.6),(0,1),(0.2,1)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0,0.4),(0,0),(0.2,0)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(1,0.6),(1,1),(0.8,1)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(1,0.4),(1,0),(0.8,0)" texture:IETextureTypeSolid]]];
+        [controller addPaths:@[[IECustomPath pathWithPointsFromString:@"(0.5,1),(0,1),(0,0.85)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.5,1),(1,1),(1,0.85)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.5,0),(0,0),(0,0.15)" texture:IETextureTypeSolid], [IECustomPath pathWithPointsFromString:@"(0.5,0),(1,0),(1,0.15)" texture:IETextureTypeSolid]]];
+        [controller addPowerups:@[[IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointMake(0.25, 0.25)], [IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointMake(0.75, 0.25)]]];
+        for (int k = 0;k<3;k++){
             IEPowerup *powerup = [IEPowerup powerupWithType:IEPowerupGravity shiftPoint:CGPointZero];
-            if (k == 0){
-                powerup.shiftPoint = CGPointMake(0.25,0.75);
-                powerup.zRotation = M_PI;
-            }
+            if (k == 0)
+                powerup.shiftPoint = CGPointMake(0.5, 0.25);
             else if (k == 1){
-                powerup.shiftPoint = CGPointMake(0.75, 0.5);
-                powerup.zRotation = M_PI_2;
-            }
-            else if (k == 2)
-                powerup.shiftPoint = CGPointMake(0.5,0.25);
-            else{
                 powerup.shiftPoint = CGPointMake(0.25, 0.5);
                 powerup.zRotation = -M_PI_2;
             }
+            else if (k == 2){
+                powerup.shiftPoint = CGPointMake(0.5, 0.75);
+                powerup.zRotation = M_PI_2;
+            }
             [controller addPowerup:powerup];
         }
-        for (int k = 0;k<2;k++){
-            IEPowerup *powerup = [IEPowerup powerupWithType:IEPowerupKey shiftPoint:CGPointZero];
-            if (k == 0)
-                powerup.shiftPoint = CGPointMake(0.25, 0.25);
-            else
-                powerup.shiftPoint = CGPointMake(0.75, 0.25);
-            [controller addPowerup:powerup];
-        }
-        [controller addPowerup:[IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointMake(0.25, 0.75)]];
-        controller.starQuantitys = IEStarQuantityCreate(11, 9, 6);
+        [controller addPowerup:[IEPowerup powerupWithType:IEPowerupAimAndFire shiftPoint:CGPointMake(0.5, 0.6)]];
     }
     else if (controller.levelNumber == 79){
         controller.levelName = @"Death Row";

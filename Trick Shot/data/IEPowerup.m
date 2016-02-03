@@ -86,4 +86,26 @@
     }
     return (NSArray*)array;
 }
+-(NSString*)description{
+    if (self.powerupType == IEPowerupAimAndFire){
+        return @"IEPowerupAimAndFire";
+    }
+    else if (self.powerupType == IEPowerupGravity){
+        return @"IEPowerupGravity";
+    }
+    else if (self.powerupType == IEPowerupKey){
+        return @"IEPowerupKey";
+    }
+    else if (self.powerupType == IEPowerupGhost){
+        return @"IEpowerupGhost";
+    }
+    else if (self.powerupType == IEPowerupTilt){
+        return @"IEpowerupTilt";
+    }
+    else if (self.powerupType == IEPowerupImmune){
+        return @"IEPowerupImmune";
+    }
+    else
+        return @"Invalid Powerup";
+}
 @end

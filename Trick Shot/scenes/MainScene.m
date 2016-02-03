@@ -14,6 +14,7 @@
 #import "ViewController.h"
 #import <CoreMotion/CoreMotion.h>
 #import "Flurry.h"
+#import "IEAudioPlayer.h"
 
 #define BALL_ARROW_SPACING 15.0
 #define MASS_CONSTANT 0.035744
@@ -95,6 +96,21 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 
 /*Method that is only called once per scene. Initializes all sprites as well as the appearance of the scene and also all data objects that are going to be held in the game */
 -(void)createSceneContent{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+        if (![player isPreloaded:@"powerup.wav"])
+            [player preloadSoundWithName:@"powerup.wav" waitForCompletion:NO];
+        
+        if (![player isPreloaded:@"swoosh.mp3"])
+            [player preloadSoundWithName:@"swoosh.mp3" waitForCompletion:NO];
+        
+        if (![player isPreloaded:@"suction-trimmed.mp3"])
+            [player preloadSoundWithName:@"suction-trimmed.mp3" waitForCompletion:NO];
+        if (![player isPreloaded:@"beep.mp3"])
+            [player preloadSoundWithName:@"beep.mp3" waitForCompletion:NO];
+        if (![player isPreloaded:@"shoot.mp3"])
+            [player preloadSoundWithName:@"shoot.mp3" waitForCompletion:NO];
+    });
     //Manager Initialization
     for (UIGestureRecognizer *recognizer in self.view.gestureRecognizers){
         [self.view removeGestureRecognizer:recognizer];
@@ -406,6 +422,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     NSLog(@"%@", string);
 }
 -(void)didBeginContact:(SKPhysicsContact *)contact{
+    [self printDebug:contact];
+    
+    
     if (self.gameState == GameStateBallMoving){
         if (contact.bodyA.categoryBitMask == instaDeathCategory || contact.bodyB.categoryBitMask == instaDeathCategory){
             if ([contact.bodyA.node isEqualToNode:self.circle]||[contact.bodyB.node isEqualToNode:self.circle]){
@@ -417,11 +436,14 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             }
         }
         else if (contact.bodyA.categoryBitMask == powerupCategory || contact.bodyB.categoryBitMask == powerupCategory){
+            IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+            [self runAction:[player soundActionWithname:@"powerup.wav"]];
             IEPowerup *powerup;
             if (contact.bodyA.categoryBitMask == powerupCategory)
                 powerup = (IEPowerup*)contact.bodyA.node;
             else
                 powerup = (IEPowerup*)contact.bodyB.node;
+            NSLog(@"%@", powerup);
             powerup.physicsBody = nil;
             IEPowerupType type = powerup.powerupType;
             if (type == IEPowerupAimAndFire){
@@ -465,7 +487,12 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                         speed = 12 * GRAVITY_FIRE_MULTIPLIER;
                     [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
                     self.circle.physicsBody.affectedByGravity = YES;
+                    [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"]];
                 }]]]];
+                SKAction *playSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"beep.mp3"];
+                SKAction *shootSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"shoot.mp3"];
+                SKAction *firstAction = [SKAction repeatAction:[SKAction sequence:@[[SKAction waitForDuration:0.5], playSound]] count:4];
+                [self runAction:[SKAction sequence:@[firstAction,shootSound]]];
             }
             else if (type == IEPowerupGhost){
                 
@@ -492,7 +519,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 
                 self.physicsBody.friction = 0.2;
                 self.physicsBody.restitution = 0.2;
-                //Changed restitution of cirlcle from 0 to 0.2. 
+                
                 self.circle.physicsBody.restitution = 0.2;
                 self.circle.physicsBody.friction = 0.2;
                 self.circle.physicsBody.linearDamping = 0.1;
@@ -588,6 +615,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             [powerup runAction:[SKAction sequence:@[[SKAction group:@[[SKAction fadeAlphaTo:0 duration:1], [SKAction scaleTo:1.4 duration:1]]], [SKAction removeFromParent]]]];
         }
         else if (contact.bodyA.categoryBitMask == holeCategory || contact.bodyB.categoryBitMask == holeCategory){
+            IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+            [self runAction:[player soundActionWithname:@"suction-trimmed.mp3"]];
             // This is when the hole and the ball collide. The game is won and the black ball is scaled down and removed while the sphere is scaled up. this ending state is also handled by the same method
             self.gameState = GameStateWon;
             self.circle.physicsBody.contactTestBitMask = 0x0;
@@ -599,6 +628,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             //Bounces off any non hole object. Changes label
             
             if (noGravity&& !tilt){
+                IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+                [self runAction:[player soundActionWithname:@"tick.mp3"]];
                 self.currentHits++;
                 self.currentHitLabel.text = [NSString stringWithFormat:@"Hits Left: %i", (int)(self.controller.starQuantitys.min-self.currentHits)];
             }
@@ -716,6 +747,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 [self.selectionSprite runAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0 duration:1], [SKAction removeFromParent]]]];
             
             self.gameState = GameStateBallMoving;
+            [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"]];
             return;
         }
         else if (!self.dragShape&&![node.name isEqualToString:@"hole"]){
@@ -1019,6 +1051,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
             [self addChild:sprite];
             [sprite runAction:[SKAction sequence:@[[SKAction waitForDuration:0.5+0.25*k], [SKAction moveByX:0 y:-sprite.size.height/2-self.size.height*1/4 duration:0.25]]]];
         }
+        SKAction *swoosh = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"];
+        [self runAction:[SKAction sequence:@[[SKAction waitForDuration:0.5], [SKAction repeatAction:[SKAction sequence:@[swoosh, [SKAction waitForDuration:0.25]]] count:starArray.count]]]];
     }
     else
         [Flurry endTimedEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObjectsAndKeys:@"Level", [NSNumber numberWithInteger:self.controller.levelNumber], @"Stars", [NSNumber numberWithInteger:0], @"Exited", [NSNumber numberWithBool:NO], nil]];

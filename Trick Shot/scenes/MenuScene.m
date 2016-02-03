@@ -12,6 +12,8 @@
 #import "ViewController.h"
 #import "SettingsScene.h"
 #import "SurvivalScene.h"
+#import "IEAudioPlayer.h"
+#import "IEDataManager.h"
 
 @interface MenuScene (){
     NSTimer *timer;
@@ -35,6 +37,7 @@ static const uint32_t contactCategory = 0x1 << 0;
     self.physicsBody.contactTestBitMask = contactCategory;
     self.physicsBody.friction = 0;
     self.physicsWorld.gravity = CGVectorMake(0, 0);
+    self.physicsWorld.contactDelegate = self;
     
     AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
     int index = arc4random()%delegate.arrayOfColors.count;
@@ -172,7 +175,7 @@ static const uint32_t contactCategory = 0x1 << 0;
     ball.physicsBody.restitution = 1;
     ball.physicsBody.linearDamping = 0;
     ball.physicsBody.angularDamping = 0;
-    ball.physicsBody.contactTestBitMask = contactCategory;
+    ball.physicsBody.categoryBitMask = contactCategory;
     ball.physicsBody.collisionBitMask = 0xFFFFFF;
     ball.physicsBody.contactTestBitMask = contactCategory;
     ball.name = @"ball";
@@ -245,7 +248,14 @@ static const uint32_t contactCategory = 0x1 << 0;
     }
 }
 -(void)didBeginContact:(SKPhysicsContact *)contact{
-    NSLog(@"Play Noise");
+    IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+    if (![player isPreloaded:@"tick.mp3"])
+        [player preloadSoundWithName:@"tick.mp3" waitForCompletion:NO];
+    
+    if (![IEDataManager sharedManager].showTutorial){
+        SKAction *action = [player soundActionWithname:@"tick.mp3"];
+        [self runAction:action];
+    }
 }
 #pragma mark - Helper and C style methods
 +(UIColor*)colorWithR:(CGFloat)r G:(CGFloat)g b:(CGFloat)b{

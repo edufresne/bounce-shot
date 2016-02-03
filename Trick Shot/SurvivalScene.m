@@ -13,6 +13,7 @@
 #import <GameKit/GameKit.h>
 #import <CoreMotion/CoreMotion.h>
 #import "IEDataManager.h"
+#import "IEAudioPlayer.h"
 #define BALL_ARROW_SPACING 15.0
 #define noGravity ((self.physicsWorld.gravity.dx == 0) && (self.physicsWorld.gravity.dy == 0))
 #define FIRE_SPEED_MULTIPLIER 1.0
@@ -70,6 +71,19 @@ static const uint32_t invincibleCategory = 0x1 << 4;
 static const uint32_t starCategory = 0x1 << 5;
 
 -(void)didMoveToView:(SKView *)view{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        IEAudioPlayer *player = [IEAudioPlayer sharedPlayer];
+        if (![player isPreloaded:@"tick.mp3"])
+            [player preloadSoundWithName:@"tick.mp3" waitForCompletion:NO];
+        if (![player isPreloaded:@"powerup.wav"])
+            [player preloadSoundWithName:@"powerup.wav" waitForCompletion:NO];
+        if (![player isPreloaded:@"swoosh-trimmed.mp3"])
+            [player preloadSoundWithName:@"swoosh.mp3" waitForCompletion:NO];
+        if (![player isPreloaded:@"beep.mp3"])
+            [player preloadSoundWithName:@"beep.mp3" waitForCompletion:NO];
+        if (![player isPreloaded:@"shoot.mp3"])
+            [player preloadSoundWithName:@"shoot.mp3" waitForCompletion:NO];
+    });
     currentPowerups = 0;
     currentStars = 0;
     self.currentObjects = [[NSMutableArray alloc]init];
@@ -106,7 +120,7 @@ static const uint32_t starCategory = 0x1 << 5;
     circle.physicsBody.mass = 0.035744;
     [self addChild:circle];
     //arrow
-    NSLog(@"%f", self.size.width/50);
+    
     SKSpriteNode *arrow = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"arrow_light.png"]];
     arrow.size = CGSizeMake(13, 11);
     arrow.alpha = 0.4;
@@ -228,6 +242,10 @@ static const uint32_t starCategory = 0x1 << 5;
             [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
             self.circle.physicsBody.affectedByGravity = YES;
         }]]]];
+        SKAction *playSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"beep.mp3"];
+        SKAction *firstAction = [SKAction repeatAction:[SKAction sequence:@[[SKAction waitForDuration:0.5], playSound]] count:4];
+        SKAction *shootSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"shoot.mp3"];
+        [self runAction:[SKAction sequence:@[firstAction, shootSound]]];
     }
     else if (type == IEPowerupImmune){
         [self.circle removeAllActions];
@@ -306,6 +324,10 @@ static const uint32_t starCategory = 0x1 << 5;
                     [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
                     self.circle.physicsBody.affectedByGravity = YES;
                 }]]]];
+                SKAction *playSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"beep.mp3"];
+                SKAction *firstAction = [SKAction repeatAction:[SKAction sequence:@[[SKAction waitForDuration:0.5], playSound]] count:4];
+                SKAction *shootSound = [[IEAudioPlayer sharedPlayer] soundActionWithname:@"shoot.mp3"];
+                [self runAction:[SKAction sequence:@[firstAction, shootSound]]];
             }
             else if (type == IEPowerupKey){
                 SKAction *sequence = [SKAction sequence:@[[SKAction waitForDuration:5], [SKAction removeFromParent]]];
@@ -399,6 +421,7 @@ static const uint32_t starCategory = 0x1 << 5;
                 [countDown addChild:copy];
                 decrement = countDown;
             }
+            [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"powerup.wav"]];
         }
         else if (contact.bodyA.categoryBitMask == edgeCategory || contact.bodyB.categoryBitMask == edgeCategory){
             SKNode *edge;
@@ -408,7 +431,10 @@ static const uint32_t starCategory = 0x1 << 5;
                 edge = contact.bodyB.node;
             if (noGravity)
                 [self.manager removePair:[self.manager connectionClosestToPoint:edge.position]];
+            [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"tick.mp3"]];
         }
+        else
+            [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"tick.mp3"]];
     }
 }
 -(void)update:(NSTimeInterval)currentTime{
@@ -529,6 +555,7 @@ static const uint32_t starCategory = 0x1 << 5;
         self.gameState = GameStatePlaying;
         [timeLabel start];
         [self generateStar];
+        [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"]];
     }
 }
 -(void)showContentList{
@@ -621,6 +648,7 @@ static const uint32_t starCategory = 0x1 << 5;
     star.position = CGPointMake(self.size.width/2-star.size.width/2-5, self.size.height+star.size.height/2);
     [self addChild:star];
     [star runAction:[SKAction sequence:@[[SKAction waitForDuration:0.25], [SKAction moveToY:(self.size.height+label.position.y)/2 duration:0.25]]]];
+    [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"]];
     SKLabelNode *counterNode = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
     counterNode.fontColor = starLabel.fontColor;
     counterNode.fontSize = 35;
