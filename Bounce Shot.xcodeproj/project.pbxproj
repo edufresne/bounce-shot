@@ -67,7 +67,7 @@
 		073714351BF8185C00EFABCD /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		073714371BF8186200EFABCD /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		078BA4AC1BF99256005CF05C /* Roboto-Thin.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Thin.ttf"; sourceTree = "<group>"; };
-		07B1F7141BF7FEC400DEE6A7 /* Trick Shot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Trick Shot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		07B1F7141BF7FEC400DEE6A7 /* Bounce Shot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Bounce Shot.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		07B1F7181BF7FEC400DEE6A7 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		07B1F71A1BF7FEC400DEE6A7 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		07B1F71B1BF7FEC400DEE6A7 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -175,7 +175,7 @@
 		07B1F7151BF7FEC400DEE6A7 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				07B1F7141BF7FEC400DEE6A7 /* Trick Shot.app */,
+				07B1F7141BF7FEC400DEE6A7 /* Bounce Shot.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -347,9 +347,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		07B1F7131BF7FEC400DEE6A7 /* Trick Shot */ = {
+		07B1F7131BF7FEC400DEE6A7 /* Bounce Shot */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 07B1F72E1BF7FEC400DEE6A7 /* Build configuration list for PBXNativeTarget "Trick Shot" */;
+			buildConfigurationList = 07B1F72E1BF7FEC400DEE6A7 /* Build configuration list for PBXNativeTarget "Bounce Shot" */;
 			buildPhases = (
 				CF9578BBC1E6F007B276A51A /* Check Pods Manifest.lock */,
 				07B1F7101BF7FEC400DEE6A7 /* Sources */,
@@ -362,9 +362,9 @@
 			);
 			dependencies = (
 			);
-			name = "Trick Shot";
+			name = "Bounce Shot";
 			productName = "Trick Shot";
-			productReference = 07B1F7141BF7FEC400DEE6A7 /* Trick Shot.app */;
+			productReference = 07B1F7141BF7FEC400DEE6A7 /* Bounce Shot.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -382,7 +382,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 07B1F70F1BF7FEC400DEE6A7 /* Build configuration list for PBXProject "Trick Shot" */;
+			buildConfigurationList = 07B1F70F1BF7FEC400DEE6A7 /* Build configuration list for PBXProject "Bounce Shot" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -395,7 +395,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				07B1F7131BF7FEC400DEE6A7 /* Trick Shot */,
+				07B1F7131BF7FEC400DEE6A7 /* Bounce Shot */,
 			);
 		};
 /* End PBXProject section */
@@ -554,7 +554,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -598,7 +599,8 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -624,8 +626,8 @@
 			baseConfigurationReference = 4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -640,7 +642,7 @@
 					"\"SystemConfiguration\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.IndieEndGames.Bounce-Draw";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Bounce Shot";
 				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
@@ -650,8 +652,8 @@
 			baseConfigurationReference = 49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -666,7 +668,7 @@
 					"\"SystemConfiguration\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.IndieEndGames.Bounce-Draw";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Bounce Shot";
 				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
@@ -674,7 +676,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		07B1F70F1BF7FEC400DEE6A7 /* Build configuration list for PBXProject "Trick Shot" */ = {
+		07B1F70F1BF7FEC400DEE6A7 /* Build configuration list for PBXProject "Bounce Shot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				07B1F72C1BF7FEC400DEE6A7 /* Debug */,
@@ -683,7 +685,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		07B1F72E1BF7FEC400DEE6A7 /* Build configuration list for PBXNativeTarget "Trick Shot" */ = {
+		07B1F72E1BF7FEC400DEE6A7 /* Build configuration list for PBXNativeTarget "Bounce Shot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				07B1F72F1BF7FEC400DEE6A7 /* Debug */,

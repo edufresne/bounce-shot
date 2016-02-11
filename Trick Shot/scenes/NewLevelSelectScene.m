@@ -13,7 +13,10 @@
 #import "ViewController.h"
 
 #define DIM_FACTOR 6.0
+#define DIM_FACTOR_IPAD 8.0
 #define STAR_DIM_FACTOR 4.0
+#define STAR_DIM_FACTOR_IPAD 5
+#define isIpad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
 
 @interface NewLevelSelectScene ()
 @property (strong, nonatomic) UISwipeGestureRecognizer *left;
@@ -112,10 +115,19 @@
                 break;
             }
             CGPoint location = CGPointMake(bufferX/2+bufferX*i, self.size.height-bufferTopBottom-bufferY/2-bufferY*k);
-            SKSpriteNode *sprite = [[SKSpriteNode alloc] initWithColor:[SKColor whiteColor] size:CGSizeMake(self.size.width/DIM_FACTOR, self.size.width/DIM_FACTOR)];
+            SKSpriteNode *sprite;
+            if (isIpad)
+                sprite = [[SKSpriteNode alloc] initWithColor:[SKColor whiteColor] size:CGSizeMake(self.size.width/DIM_FACTOR_IPAD, self.size.width/DIM_FACTOR_IPAD)];
+            else
+                sprite = [[SKSpriteNode alloc] initWithColor:[SKColor whiteColor] size:CGSizeMake(self.size.width/DIM_FACTOR, self.size.width/DIM_FACTOR)];
+            
             sprite.position = location;
             SKShapeNode *shape = [SKShapeNode node];
-            shape.path = CGPathCreateWithRoundedRect(CGRectMake(-self.size.width/DIM_FACTOR, -self.size.width/DIM_FACTOR, self.size.width/DIM_FACTOR*2, self.size.width/DIM_FACTOR*2), 12, 12, NULL);
+            if (isIpad)
+                shape.path = CGPathCreateWithRoundedRect(CGRectMake(-self.size.width/DIM_FACTOR_IPAD, -self.size.width/DIM_FACTOR_IPAD, self.size.width/DIM_FACTOR_IPAD*2, self.size.width/DIM_FACTOR_IPAD*2), 12, 12, NULL);
+            else
+                shape.path = CGPathCreateWithRoundedRect(CGRectMake(-self.size.width/DIM_FACTOR, -self.size.width/DIM_FACTOR, self.size.width/DIM_FACTOR*2, self.size.width/DIM_FACTOR*2), 12, 12, NULL);
+            
             if (![delegate hasDarkColorSchemeForIndex:self.pageIndex]){
                 shape.fillColor = [SKColor whiteColor];
                 shape.strokeColor = [SKColor whiteColor];
@@ -131,7 +143,10 @@
             
             SKLabelNode *label = [SKLabelNode labelNodeWithFontNamed:@"Roboto-Thin"];
             label.fontColor = self.backgroundColor;
-            label.fontSize = 25;
+            if (isIpad)
+                label.fontSize = 50;
+            else
+                label.fontSize = 25;
             label.text = [NSString stringWithFormat:@"%i", (int)currentNumber];
             [label setHorizontalAlignmentMode:SKLabelHorizontalAlignmentModeCenter];
             [label setVerticalAlignmentMode:SKLabelVerticalAlignmentModeCenter];
@@ -161,18 +176,27 @@
             currentNumber++;
             if (stars == 1){
                 SKSpriteNode *star = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
-                star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
+                if (isIpad)
+                    star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR_IPAD, sprite.size.height/STAR_DIM_FACTOR_IPAD);
+                else
+                    star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
                 star.position = CGPointMake(0, -sprite.size.height/2-star.size.height/2);
                 [sprite addChild:star];
                 star.name = [NSString stringWithFormat:@"Button%i", (int)currentNumber];
             }
             else if (stars == 2){
                 SKSpriteNode *star1 = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
-                star1.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
+                if (isIpad)
+                    star1.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR_IPAD, sprite.size.height/STAR_DIM_FACTOR_IPAD);
+                else
+                    star1.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
                 star1.position = CGPointMake(-sprite.size.width/6, -sprite.size.height/2-star1.size.height/2);
                 star1.name = [NSString stringWithFormat:@"Button%i", (int)currentNumber];
                 SKSpriteNode *star2 = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
-                star2.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
+                if (isIpad)
+                    star2.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR_IPAD, sprite.size.height/STAR_DIM_FACTOR_IPAD);
+                else
+                    star2.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
                 star2.position = CGPointMake(+sprite.size.width/6, -sprite.size.height/2-star2.size.height/2);
                 star2.name = [NSString stringWithFormat:@"Button%i", (int)currentNumber];
                 [sprite addChild:star1];
@@ -181,7 +205,10 @@
             else if (stars == 3){
                 for (int k = 0;k<stars;k++){
                     SKSpriteNode *star = [SKSpriteNode spriteNodeWithTexture:[SKTexture textureWithImageNamed:@"star.png"]];
-                    star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
+                    if (isIpad)
+                        star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR_IPAD, sprite.size.height/STAR_DIM_FACTOR_IPAD);
+                    else
+                        star.size = CGSizeMake(sprite.size.width/STAR_DIM_FACTOR, sprite.size.height/STAR_DIM_FACTOR);
                     if (k == 0)
                         star.position = CGPointMake(0, -star.size.height/2-sprite.size.height/2);
                     else if (k == 1)

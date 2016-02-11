@@ -16,6 +16,15 @@
 #import "Flurry.h"
 #import "IEAudioPlayer.h"
 
+#define BASE_DIM_FACTOR 6.4
+#define baseWidth self.size.width/BASE_DIM_FACTOR
+
+#define BASE_RADIUS_FACTOR 20.0
+#define baseRadius self.size.width/BASE_RADIUS_FACTOR
+
+#define isIpad UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
+#define baseVelocity (1.0+(float)(isIpad))*12.0
+
 #define BALL_ARROW_SPACING 15.0
 #define MASS_CONSTANT 0.035744
 #define DIM_FACTOR_POWERUP 12
@@ -84,6 +93,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 #pragma mark - Startup
 /*Method called when the scene is presented to an SKView. Initializes enums and calls createSceneContent */
 -(void)didMoveToView:(SKView *)view{
+    NSLog(@"%i", isIpad);
+    NSLog(@"%f", baseVelocity);
     if (!self.contentCreated){
         [Flurry logEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObject:@"Level" forKey:[NSNumber numberWithInteger:self.controller.levelNumber]] timed:YES];
         self.popupAtlas = [SKTextureAtlas atlasNamed:@"dialogue.atlas"];
@@ -198,7 +209,12 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     /*Circle node initialization with physics body. Layout is determined from the controller*/
     SKTexture *texture = [self.view textureFromNode:shape];
     circle = [SKSpriteNode spriteNodeWithTexture:texture];
-    circle.size = CGSizeMake(self.controller.ballRadius*2, self.controller.ballRadius*2);
+    circle.size = CGSizeMake(baseRadius*2*self.controller.ballRadius, baseRadius*2*self.controller.ballRadius);
+    
+    //IPAD FACTOR
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+        circle.size = CGSizeMake(circle.size.width/25.0, circle.size.width/25.0);
+    
     if (self.controller.ballLocation == IEObjectLayoutCustom){
         CGPoint shiftPoint = [delegate getShiftPointForIntegerKey:self.controller.levelNumber ball:YES];
         circle.position = CGPointMake(shiftPoint.x*self.size.width, shiftPoint.y*self.size.height);
@@ -220,7 +236,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     [self addChild:circle];
     /*Arrow on top of node */
     SKSpriteNode *arrow = [[SKSpriteNode alloc] initWithTexture:[SKTexture textureWithImageNamed:@"arrow_light"]];
-    arrow.position = CGPointMake(circle.position.x+cosf(self.controller.ballAngle)*(BALL_ARROW_SPACING+self.controller.ballRadius), circle.position.y+sinf(self.controller.ballAngle)*(BALL_ARROW_SPACING+self.controller.ballRadius));
+    arrow.position = CGPointMake(circle.position.x+cosf(self.controller.ballAngle)*(BALL_ARROW_SPACING+circle.size.width/2), circle.position.y+sinf(self.controller.ballAngle)*(BALL_ARROW_SPACING+circle.size.width/2));
     arrow.size = CGSizeMake(13, 11);
     arrow.alpha = 0.4;
     arrow.name = @"arrow";
@@ -422,9 +438,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     NSLog(@"%@", string);
 }
 -(void)didBeginContact:(SKPhysicsContact *)contact{
-    [self printDebug:contact];
-    
-    
     if (self.gameState == GameStateBallMoving){
         if (contact.bodyA.categoryBitMask == instaDeathCategory || contact.bodyB.categoryBitMask == instaDeathCategory){
             if ([contact.bodyA.node isEqualToNode:self.circle]||[contact.bodyB.node isEqualToNode:self.circle]){
@@ -443,7 +456,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 powerup = (IEPowerup*)contact.bodyA.node;
             else
                 powerup = (IEPowerup*)contact.bodyB.node;
-            NSLog(@"%@", powerup);
             powerup.physicsBody = nil;
             IEPowerupType type = powerup.powerupType;
             if (type == IEPowerupAimAndFire){
@@ -482,9 +494,9 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                     self.gameState = GameStateBallMoving;
                     CGFloat speed;
                     if (noGravity)
-                        speed = 12* FIRE_SPEED_MULTIPLIER;
+                        speed = baseVelocity * FIRE_SPEED_MULTIPLIER;
                     else
-                        speed = 12 * GRAVITY_FIRE_MULTIPLIER;
+                        speed = baseVelocity * GRAVITY_FIRE_MULTIPLIER;
                     [self.circle.physicsBody applyImpulse:createAngledVector(speed, storedTheta)];
                     self.circle.physicsBody.affectedByGravity = YES;
                     [self runAction:[[IEAudioPlayer sharedPlayer] soundActionWithname:@"swoosh.mp3"]];
@@ -738,7 +750,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
                 node.physicsBody.dynamic = NO;
             }
             circle.physicsBody.collisionBitMask = edgeCategory | solidCategory;
-            [circle.physicsBody applyImpulse:createAngledVector(12,self.controller.ballAngle)];
+            [circle.physicsBody applyImpulse:createAngledVector(baseVelocity,self.controller.ballAngle)];
             SKNode *label = [self childNodeWithName:@"titleLabel"];
             [label removeFromParent];
             SKNode *arrow = [self childNodeWithName:@"arrow"];
@@ -1190,55 +1202,52 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     else if ([pair.textureName isEqualToString:IETextureTypeCharged])
         color = [MainScene colorWithR:70 G:113 B:255];
     
-    
     if ([pair.shapeName isEqualToString:@"square"]){
-        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(50*pair.scale, 50*pair.scale)];
+        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale)];
         sprite.color = color;
         sprite.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:@"rectangle_short"]){
-        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(100*pair.scale, 50*pair.scale)];
+        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(2*baseWidth*pair.scale, baseWidth*pair.scale)];
         sprite.color = color;
         sprite.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:sprite.size];
     }
     else if([pair.shapeName isEqualToString:@"rectangle_long"]){
-        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(200*pair.scale, 50*pair.scale)];
+        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(4*baseWidth*pair.scale, baseWidth*pair.scale)];
         sprite.color = color;
         sprite.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:sprite.size];
     }
     else if([pair.shapeName isEqualToString:@"rectangle_longest"]){
-        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(300*pair.scale, 50*pair.scale)];
+        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(6*baseWidth*pair.scale, baseWidth*pair.scale)];
         sprite.color = color;
         sprite.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:@"rectangle_thin"]){
-        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(400*pair.scale, 25*pair.scale)];
+        sprite = [SKSpriteNode spriteNodeWithColor:[SKColor whiteColor] size:CGSizeMake(8*baseWidth*pair.scale, baseWidth*pair.scale/2)];
         sprite.color = color;
         sprite.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameTriangleEquilateral]){
         
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-25*pair.scale, -25*pair.scale)];
-        [path addLineToPoint:CGPointMake(0, 25*pair.scale)];
-        [path addLineToPoint:CGPointMake(25*pair.scale, -25*pair.scale)];
+        [path moveToPoint:CGPointMake(-baseWidth*pair.scale/2, -baseWidth*pair.scale/2)];
+        [path addLineToPoint:CGPointMake(0, baseWidth*pair.scale/2)];
+        [path addLineToPoint:CGPointMake(baseWidth*pair.scale/2, -baseWidth*pair.scale/2)];
         [path closePath];
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
         shape.fillColor = color;
         shape.strokeColor = color;
         SKTexture *texture = [self.view textureFromNode:shape];
         
-        
-        
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithPolygonFromPath:shape.path];
     }
     else if ([pair.shapeName isEqualToString:@"triangle_right"]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-25*pair.scale, -25*pair.scale)];
-        [path addLineToPoint:CGPointMake(-25*pair.scale, 25*pair.scale)];
-        [path addLineToPoint:CGPointMake(25*pair.scale, -25*pair.scale)];
+        [path moveToPoint:CGPointMake(-baseWidth*pair.scale/2, -baseWidth*pair.scale/2)];
+        [path addLineToPoint:CGPointMake(-baseWidth*pair.scale/2, baseWidth*pair.scale/2)];
+        [path addLineToPoint:CGPointMake(baseWidth*pair.scale/2, -baseWidth*pair.scale/2)];
         [path closePath];
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
         shape.fillColor = color;
@@ -1246,14 +1255,14 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         SKTexture *texture = [self.view textureFromNode:shape];
         
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameTrianglePointy]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-25*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(0, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(25*pair.scale, -100*pair.scale)];
+        [path moveToPoint:CGPointMake(-baseWidth*pair.scale/2, baseWidth*pair.scale*2)];
+        [path addLineToPoint:CGPointMake(0, baseWidth*pair.scale*2)];
+        [path addLineToPoint:CGPointMake(baseWidth*pair.scale/2, -baseWidth*pair.scale*2)];
         [path closePath];
         
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
@@ -1262,7 +1271,7 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         SKTexture *texture = [self.view textureFromNode:shape];
         
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 200*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, 4*baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:@"circle"]){
@@ -1272,17 +1281,17 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         SKTexture *texutre = [self.view textureFromNode:shape];
         
         sprite = [SKSpriteNode spriteNodeWithTexture:texutre];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
-        sprite.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:25*pair.scale];
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
+        sprite.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:baseWidth/2*pair.scale];
     }
     else if ([pair.shapeName isEqualToString:@"corner_thin"]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-25*pair.scale, -25*pair.scale)];
-        [path addLineToPoint:CGPointMake(-25*pair.scale, 25*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75/4*pair.scale, 25*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75/4*pair.scale, -75/4*pair.scale)];
-        [path addLineToPoint:CGPointMake(25*pair.scale, -75/4*pair.scale)];
-        [path addLineToPoint:CGPointMake(25*pair.scale, -25*pair.scale)];
+        [path moveToPoint:CGPointMake(-baseWidth/2*pair.scale, -baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-baseWidth/2*pair.scale, baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-0.37*baseWidth*pair.scale, baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-0.37*baseWidth*pair.scale, -0.37*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(baseWidth/2*pair.scale, -0.37*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(baseWidth/2*pair.scale, -baseWidth/2*pair.scale)];
         [path closePath];
         
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
@@ -1291,17 +1300,17 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         SKTexture *texture = [self.view textureFromNode:shape];
         
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:@"corner_thick"]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-100*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-50*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-50*pair.scale, -50*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, -50*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, -100*pair.scale)];
+        [path moveToPoint:CGPointMake(-2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-2*baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-baseWidth*pair.scale, -baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, -baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
         [path closePath];
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
         shape.fillColor = color;
@@ -1309,42 +1318,42 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         SKTexture *texture = [self.view textureFromNode:shape];
         
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameSquareBox]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-100*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -75*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, -75*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, 75*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, 75*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -100*pair.scale)];
+        [path moveToPoint:CGPointMake(-2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-2*baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -3*baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth/2*pair.scale, -3*baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(3*baseWidth/2*pair.scale, 3*baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, 3*baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -2*baseWidth*pair.scale)];
         [path closePath];
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
         shape.fillColor = color;
         shape.strokeColor = color;
         SKTexture *texture = [self.view textureFromNode:shape];
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameRectangleBox]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*pair.scale, -300)];
-        [path addLineToPoint:CGPointMake(-100*pair.scale, 300*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, 300*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, -300*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -300*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -275*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, -275*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, 275*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, 275*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, -300*pair.scale)];
+        [path moveToPoint:CGPointMake(-2*baseWidth*pair.scale, -6*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-2*baseWidth*pair.scale, 6*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, 6*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, -6*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -6*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -5.5*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(3*baseWidth/2*pair.scale, -5.5*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(3*baseWidth/2*pair.scale, 5.5*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, 5*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -6*baseWidth*pair.scale)];
         [path closePath];
         
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
@@ -1352,19 +1361,19 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         shape.strokeColor = color;
         SKTexture *texture = [self.view textureFromNode:shape];
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(50*pair.scale, 50*pair.scale);
+        sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameSquareBoxOpen]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-75*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-100*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(-100*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, 100*pair.scale)];
-        [path addLineToPoint:CGPointMake(100*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, -100*pair.scale)];
-        [path addLineToPoint:CGPointMake(75*pair.scale, 75*pair.scale)];
-        [path addLineToPoint:CGPointMake(-75*pair.scale, 75*pair.scale)];
+        [path moveToPoint:CGPointMake(-3*baseWidth/2*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(-2*baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, 2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(2*baseWidth*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(3*baseWidth/2*pair.scale, -2*baseWidth*pair.scale)];
+        [path addLineToPoint:CGPointMake(3*baseWidth/2*pair.scale, 3*baseWidth/2*pair.scale)];
+        [path addLineToPoint:CGPointMake(-3*baseWidth/2*pair.scale, 3*baseWidth/2*pair.scale)];
         [path closePath];
         
         SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
@@ -1372,16 +1381,16 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         shape.strokeColor = color;
         SKTexture *texture = [self.view textureFromNode:shape];
         sprite = [SKSpriteNode spriteNodeWithTexture:texture];
-        sprite.size = CGSizeMake(200*pair.scale, 200*pair.scale);
+        sprite.size = CGSizeMake(4*baseWidth*pair.scale, 4*baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithTexture:texture size:sprite.size];
         [sprite runAction:[SKAction scaleBy:0.25 duration:0]];
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameArcHalf]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*pair.scale, 0)];
-        [path addArcWithCenter:CGPointZero radius:100*pair.scale startAngle:M_PI endAngle:0 clockwise:NO];
-        [path addLineToPoint:CGPointMake(85*pair.scale, 0)];
-        [path addArcWithCenter:CGPointZero radius:85*pair.scale startAngle:0 endAngle:M_PI clockwise:YES];
+        [path moveToPoint:CGPointMake(-2*baseWidth*pair.scale, 0)];
+        [path addArcWithCenter:CGPointZero radius:2*baseWidth*pair.scale startAngle:M_PI endAngle:0 clockwise:NO];
+        [path addLineToPoint:CGPointMake(1.7*baseWidth*pair.scale, 0)];
+        [path addArcWithCenter:CGPointZero radius:1.7*baseWidth*pair.scale startAngle:0 endAngle:M_PI clockwise:YES];
         [path closePath];
         SKShapeNode *shapeNode = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
         shapeNode.fillColor = color;
@@ -1392,10 +1401,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameArcQuarter]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*cosf(M_PI_4)*pair.scale, 100*sinf(M_PI_4)*pair.scale)];
-        [path addArcWithCenter:CGPointZero radius:100*pair.scale startAngle:M_PI-M_PI_4 endAngle:M_PI_4 clockwise:NO];
-        [path addLineToPoint:CGPointMake(85*cosf(M_PI_4)*pair.scale, 85*sinf(M_PI_4)*pair.scale)];
-        [path addArcWithCenter:CGPointZero radius:85*pair.scale startAngle:M_PI_4 endAngle:M_PI-M_PI_4 clockwise:YES];
+        [path moveToPoint:CGPointMake(-2*baseWidth*cosf(M_PI_4)*pair.scale, 2*baseWidth*sinf(M_PI_4)*pair.scale)];
+        [path addArcWithCenter:CGPointZero radius:2*baseWidth*pair.scale startAngle:M_PI-M_PI_4 endAngle:M_PI_4 clockwise:NO];
+        [path addLineToPoint:CGPointMake(1.7*baseWidth*cosf(M_PI_4)*pair.scale, 1.7*baseWidth*sinf(M_PI_4)*pair.scale)];
+        [path addArcWithCenter:CGPointZero radius:1.7*baseWidth*pair.scale startAngle:M_PI_4 endAngle:M_PI-M_PI_4 clockwise:YES];
         [path closePath];
         SKShapeNode *shapeNode = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
         shapeNode.fillColor = color;
@@ -1407,10 +1416,10 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     }
     else if ([pair.shapeName isEqualToString:IEShapeNameArcThird]){
         UIBezierPath *path = [UIBezierPath bezierPath];
-        [path moveToPoint:CGPointMake(-100*cosf(M_PI/3)*pair.scale, 100*sinf(M_PI/3)*pair.scale)];
-        [path addArcWithCenter:CGPointZero radius:100*pair.scale startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:NO];
-        [path addLineToPoint:CGPointMake(85*cosf(M_PI/3)*pair.scale, 85*sinf(M_PI/3)*pair.scale)];
-        [path addArcWithCenter:CGPointZero radius:85*pair.scale startAngle:M_PI/3 endAngle:M_PI*2/3 clockwise:YES];
+        [path moveToPoint:CGPointMake(-2*baseWidth*cosf(M_PI/3)*pair.scale, 2*baseWidth*sinf(M_PI/3)*pair.scale)];
+        [path addArcWithCenter:CGPointZero radius:2*baseWidth*pair.scale startAngle:M_PI*2/3 endAngle:M_PI/3 clockwise:NO];
+        [path addLineToPoint:CGPointMake(1.7*baseWidth*cosf(M_PI/3)*pair.scale, 1.7*baseWidth*sinf(M_PI/3)*pair.scale)];
+        [path addArcWithCenter:CGPointZero radius:1.7*baseWidth*pair.scale startAngle:M_PI/3 endAngle:M_PI*2/3 clockwise:YES];
         [path closePath];
         SKShapeNode *shapeNode = [SKShapeNode shapeNodeWithPath:path.CGPath centered:YES];
         shapeNode.fillColor = [SKColor whiteColor];

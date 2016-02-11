@@ -83,7 +83,7 @@ IEStarQuantity IEStarQuantityCreate(NSUInteger min, NSUInteger twoStars, NSUInte
 @implementation IEBounceLevelController
 -(id)init{
     if (self = [super init]){
-        self.ballRadius = 16;
+        self.ballRadius = 1;
         self.ballAngle = 0;
         self.ballLocation = IEObjectLayoutLeft;
         self.holeLayout = IEObjectLayoutRight;

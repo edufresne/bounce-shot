@@ -70,6 +70,8 @@
         [[NSUserDefaults standardUserDefaults] synchronize];
         self.isLoaded = YES;
     }
+    self.highestUnlock = 102;
+#warning hack
     return self;
 }
 -(void)completedLevel:(NSUInteger)level withStars:(NSUInteger)stars{

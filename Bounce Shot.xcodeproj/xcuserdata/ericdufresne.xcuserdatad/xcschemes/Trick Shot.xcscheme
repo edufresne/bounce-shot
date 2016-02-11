@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "07B1F7131BF7FEC400DEE6A7"
-               BuildableName = "Trick Shot.app"
-               BlueprintName = "Trick Shot"
-               ReferencedContainer = "container:Trick Shot.xcodeproj">
+               BuildableName = "Bounce Shot.app"
+               BlueprintName = "Bounce Shot"
+               ReferencedContainer = "container:Bounce Shot.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "07B1F7131BF7FEC400DEE6A7"
-            BuildableName = "Trick Shot.app"
-            BlueprintName = "Trick Shot"
-            ReferencedContainer = "container:Trick Shot.xcodeproj">
+            BuildableName = "Bounce Shot.app"
+            BlueprintName = "Bounce Shot"
+            ReferencedContainer = "container:Bounce Shot.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "07B1F7131BF7FEC400DEE6A7"
-            BuildableName = "Trick Shot.app"
-            BlueprintName = "Trick Shot"
-            ReferencedContainer = "container:Trick Shot.xcodeproj">
+            BuildableName = "Bounce Shot.app"
+            BlueprintName = "Bounce Shot"
+            ReferencedContainer = "container:Bounce Shot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -75,9 +75,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "07B1F7131BF7FEC400DEE6A7"
-            BuildableName = "Trick Shot.app"
-            BlueprintName = "Trick Shot"
-            ReferencedContainer = "container:Trick Shot.xcodeproj">
+            BuildableName = "Bounce Shot.app"
+            BlueprintName = "Bounce Shot"
+            ReferencedContainer = "container:Bounce Shot.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
