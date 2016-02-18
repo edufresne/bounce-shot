@@ -135,12 +135,18 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="yBI-bK-nwH" firstAttribute="leading" secondItem="6hZ-tE-lFq" secondAttribute="leadingMargin" constant="-20" id="4zJ-zO-mcs"/>
+                            <constraint firstItem="yBI-bK-nwH" firstAttribute="leading" secondItem="6hZ-tE-lFq" secondAttribute="leadingMargin" constant="-20" id="4zJ-zO-mcs">
+                                <variation key="heightClass=regular-widthClass=regular" constant="155"/>
+                            </constraint>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="centerY" secondItem="6hZ-tE-lFq" secondAttribute="centerY" id="7b1-uy-4R5"/>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="bottom" secondItem="7SD-Gl-LEA" secondAttribute="top" id="8y1-e6-1HL"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="yBI-bK-nwH" secondAttribute="trailing" constant="-20" id="A9G-aH-31Y"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="yBI-bK-nwH" secondAttribute="trailing" constant="-20" id="A9G-aH-31Y">
+                                <variation key="heightClass=regular-widthClass=regular" constant="155"/>
+                            </constraint>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="centerX" secondItem="6hZ-tE-lFq" secondAttribute="centerX" id="KZV-vq-kkr"/>
-                            <constraint firstItem="7SD-Gl-LEA" firstAttribute="top" secondItem="yBI-bK-nwH" secondAttribute="bottom" id="LyE-XB-TUo"/>
+                            <constraint firstItem="7SD-Gl-LEA" firstAttribute="top" secondItem="yBI-bK-nwH" secondAttribute="bottom" id="LyE-XB-TUo">
+                                <variation key="heightClass=regular-widthClass=regular" constant="30"/>
+                            </constraint>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="leading" secondItem="6hZ-tE-lFq" secondAttribute="leading" id="QfZ-Ol-Z9Q"/>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="top" secondItem="6hZ-tE-lFq" secondAttribute="topMargin" id="Yn4-hX-c4g"/>
                             <constraint firstItem="yBI-bK-nwH" firstAttribute="top" secondItem="6hZ-tE-lFq" secondAttribute="top" id="cYK-FY-B2G"/>
@@ -177,7 +183,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gox-ub-zhg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2832" y="223"/>
+            <point key="canvasLocation" x="2832" y="222.75"/>
         </scene>
         <!--Page View Controller-->
         <scene sceneID="j6A-Sd-gqQ">

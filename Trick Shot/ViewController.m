@@ -14,7 +14,7 @@
 #import "NewLevelSelectScene.h"
 #import "Flurry.h"
 //Set to YES if FPS and other debug info should be shown 
-#define scenedebug YES
+#define scenedebug NO
 #define SESSIONS_PER_AD 4
 
 @interface ViewController ()

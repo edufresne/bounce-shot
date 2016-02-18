@@ -17,8 +17,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    AppDelegate *delegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    self.view.backgroundColor = [delegate.arrayOfColors objectAtIndex:0];
     self.imageView.image = [UIImage imageNamed:self.imageName];
     // Do any additional setup after loading the view.
 }

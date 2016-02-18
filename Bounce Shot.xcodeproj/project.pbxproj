@@ -626,8 +626,8 @@
 			baseConfigurationReference = 4BFC823B58D451F57999DF9C /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -652,8 +652,8 @@
 			baseConfigurationReference = 49B4DB91054DBB3A6F0B69CD /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Tyler Nevery (52899258R3)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Tyler Nevery (736FZ6564Y)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Trick Shot/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;

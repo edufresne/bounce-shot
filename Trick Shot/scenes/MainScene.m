@@ -93,8 +93,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
 #pragma mark - Startup
 /*Method called when the scene is presented to an SKView. Initializes enums and calls createSceneContent */
 -(void)didMoveToView:(SKView *)view{
-    NSLog(@"%i", isIpad);
-    NSLog(@"%f", baseVelocity);
     if (!self.contentCreated){
         [Flurry logEvent:@"Played Game" withParameters:[NSDictionary dictionaryWithObject:@"Level" forKey:[NSNumber numberWithInteger:self.controller.levelNumber]] timed:YES];
         self.popupAtlas = [SKTextureAtlas atlasNamed:@"dialogue.atlas"];
@@ -1280,6 +1278,8 @@ static const uint32_t invincibleCategory =  0x1 << 7;
         shape.strokeColor = color;
         SKTexture *texutre = [self.view textureFromNode:shape];
         
+        if (isIpad && self.controller.levelNumber == 14)
+            pair.scale /= 2;
         sprite = [SKSpriteNode spriteNodeWithTexture:texutre];
         sprite.size = CGSizeMake(baseWidth*pair.scale, baseWidth*pair.scale);
         sprite.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:baseWidth/2*pair.scale];
