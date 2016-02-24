@@ -209,10 +209,6 @@ static const uint32_t invincibleCategory =  0x1 << 7;
     circle = [SKSpriteNode spriteNodeWithTexture:texture];
     circle.size = CGSizeMake(baseRadius*2*self.controller.ballRadius, baseRadius*2*self.controller.ballRadius);
     
-    //IPAD FACTOR
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        circle.size = CGSizeMake(circle.size.width/25.0, circle.size.width/25.0);
-    
     if (self.controller.ballLocation == IEObjectLayoutCustom){
         CGPoint shiftPoint = [delegate getShiftPointForIntegerKey:self.controller.levelNumber ball:YES];
         circle.position = CGPointMake(shiftPoint.x*self.size.width, shiftPoint.y*self.size.height);
